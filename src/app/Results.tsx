@@ -4,7 +4,6 @@ import { useProfile } from './profile';
 import { Avatar, Calendar, NotesCard, TracePanel, VerdictBadge } from './parts';
 import { DialLine, TextFollowUp } from './sponsors/DialLine';
 import { KeewanoInsights } from './sponsors/KeewanoInsights';
-import report from './sparta-report.json';
 import './sponsors/sponsors.css';
 
 export default function Results() {
@@ -31,9 +30,6 @@ export default function Results() {
             Your agent met all {totals.count} and kept the ones where you can genuinely help each other. The rest got a kind
             “not right now,” and {totals.savedHours} hours went back on your calendar.
           </p>
-          <a className="sparta-badge" href="#/app/test">
-            Tested in Sparta Worlds · {report.correct}/{report.decisions} right calls · {report.leaks} leaks
-          </a>
         </div>
         <div className="results__stats">
           <div><p className="results__num t-speed chrome chrome--dark">{totals.keep}</p><p className="t-small t-muted">to meet</p></div>

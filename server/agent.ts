@@ -1,5 +1,5 @@
 // The screening agent itself: one founder's brief in, a meet/skip call and a reply out.
-// Shared by the Dial phone line, the Sparta Worlds test harness and the Keewano insights route.
+// Shared by the Dial phone line and the Keewano routes.
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 

@@ -5,21 +5,20 @@ import { agentLabel, agentName, useProfile, type AgentProvider } from './profile
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
-import SpartaCheck from './sponsors/SpartaCheck';
 import './app.css';
 
-export type Step = 'login' | 'linkedin' | 'questions' | 'calendar' | 'compress' | 'test' | 'live' | 'results';
+export type Step = 'login' | 'linkedin' | 'questions' | 'calendar' | 'compress' | 'live' | 'results';
 
 const STAGES: [label: string, steps: Step[]][] = [
   ['Profile', ['linkedin', 'questions']],
   ['Calendar', ['calendar', 'compress']],
-  ['Agent meets', ['test', 'live']],
+  ['Agent meets', ['live']],
   ['Results', ['results']]
 ];
 
 function readStep(): Step {
   const s = window.location.hash.split('/')[2] as Step | undefined;
-  const all: Step[] = ['login', 'linkedin', 'questions', 'calendar', 'compress', 'test', 'live', 'results'];
+  const all: Step[] = ['login', 'linkedin', 'questions', 'calendar', 'compress', 'live', 'results'];
   return s && all.includes(s) ? s : 'login';
 }
 
@@ -63,8 +62,7 @@ export default function App() {
         {step === 'linkedin' && <LinkedIn onDone={() => go('questions')} />}
         {step === 'questions' && <Questions onDone={() => go('calendar')} />}
         {step === 'calendar' && <ConnectCalendar onDone={() => go('compress')} />}
-        {step === 'compress' && <Compress onDone={() => go('test')} />}
-        {step === 'test' && <SpartaCheck onDone={() => go('live')} />}
+        {step === 'compress' && <Compress onDone={() => go('live')} />}
         {step === 'live' && <LiveRun onDone={() => go('results')} />}
         {step === 'results' && <Results />}
       </main>
