@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signal system design</title>
+<link rel="stylesheet" href="../../design-system/tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  .slide { position: relative; width: 1920px; height: 1080px; background: var(--paper); font-family: var(--font-sans); color: var(--ink); overflow: hidden; }
+  .abs { position: absolute; }
+  .kicker { font-family: var(--font-condensed); font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-64); }
+  h1 { font-size: 46px; font-weight: 900; letter-spacing: -0.02em; margin-top: 4px; }
+  .legend { right: 60px; top: 66px; display: flex; gap: 24px; font-size: 18px; font-weight: 600; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 22px; height: 16px; border-radius: 4px; border: 2px solid; display: inline-block; }
+  .box { background: var(--white); border: 2.5px solid var(--ink); border-radius: 18px; padding: 18px 22px; display: flex; flex-direction: column; justify-content: center; }
+  .box .hd { display: flex; align-items: center; gap: 12px; }
+  .box b { font-size: 26px; font-weight: 900; letter-spacing: -0.01em; }
+  .box p { font-size: 17px; color: var(--ink-64); margin-top: 6px; line-height: 1.3; }
+  .logo { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; flex-shrink: 0; }
+  .src { background: var(--white); border: 2px solid var(--ink); border-radius: 12px; font-size: 19px; font-weight: 600; display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+  .src .logo { width: 28px; height: 28px; border-radius: 6px; }
+  .app { background: #eef8ef; border-color: #2e7d32; }
+  .kee { background: #f1eaff; border: 3px solid #6a3fb5; }
+  .kee b { color: #6a3fb5; }
+  .dial { background: #fff1e0; border: 3px solid #e8710a; }
+  .dial b { color: #c25600; }
+  .room { background: var(--ink); color: white; border-color: var(--ink); }
+  .room p { color: rgb(255 255 255 / 0.7); }
+  .room .logo { background: white; padding: 2px; }
+  .stack { background: var(--white); border: 2px solid var(--ink-10); border-radius: 16px; padding: 14px 18px; }
+  .stack h3 { font-family: var(--font-condensed); font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-64); font-weight: 600; margin-bottom: 6px; }
+  .stack div { display: flex; align-items: center; gap: 10px; font-size: 16px; line-height: 1.2; padding: 3px 0; }
+  .stack img { width: 22px; height: 22px; border-radius: 5px; object-fit: contain; }
+  .stack strong { font-weight: 900; }
+  .wl { font-family: var(--font-sans); font-size: 17px; font-weight: 600; fill: var(--ink-64); }
+  .wl-strong { font-family: var(--font-sans); font-size: 19px; font-weight: 900; fill: var(--ink); }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="abs" style="left:60px; top:44px;">
+    <p class="kicker">Signal · system design</p>
+    <h1>How Signal works</h1>
+  </div>
+  <div class="legend abs">
+    <span><i class="sw" style="border-color:#2e7d32;background:#eef8ef"></i>Frontend</span>
+    <span><i class="sw" style="border-color:#6a3fb5;background:#f1eaff"></i>KeewanoDB</span>
+    <span><i class="sw" style="border-color:#e8710a;background:#fff1e0"></i>Dial</span>
+  </div>
+
+  <!-- Top row -->
+  <div class="box app abs" style="left:400px; top:180px; width:320px; height:120px;">
+    <div class="hd"><img class="logo" src="../../design-system/brand/signal-mark.svg" alt=""><b>Signal app</b></div><p>Frontend · React 19, Vite, three.js, motion</p>
+  </div>
+  <div class="box abs" style="left:1100px; top:180px; width:360px; height:130px;">
+    <div class="hd"><img class="logo" src="logos/fireworks.png" alt=""><b>Signal agent</b></div><p>Founder · Muse Glimmer 30B<br>Hosted on Fireworks</p>
+  </div>
+  <div class="box room abs" style="left:1560px; top:180px; width:300px; height:270px;"><div class="hd"><img class="logo" src="logos/dial.png" alt=""><b>Meeting room</b></div><p>The two agents talk on a Dial agent-to-agent call. Muse Glimmer 30B runs each side.</p></div>
+
+  <!-- Sources -->
+  <div class="src abs" style="left:60px; top:330px; width:240px; height:52px;">Personal agents</div>
+  <div class="src abs" style="left:60px; top:392px; width:240px; height:52px;"><img class="logo" src="logos/linkedin.svg" alt="">LinkedIn</div>
+  <div class="src abs" style="left:60px; top:454px; width:240px; height:52px;"><img class="logo" src="logos/gmail.svg" alt="">Gmail</div>
+  <div class="src abs" style="left:60px; top:516px; width:240px; height:52px;"><img class="logo" src="logos/gcal.svg" alt="">Google Calendar</div>
+  <div class="src abs" style="left:60px; top:578px; width:240px; height:52px;"><img class="logo" src="logos/openai.png" alt="">OpenAI</div>
+  <div class="src abs" style="left:60px; top:640px; width:240px; height:52px;"><img class="logo" src="logos/claude.png" alt="">Claude</div>
+  <div class="src abs" style="left:60px; top:702px; width:240px; height:52px;"><img class="logo" src="logos/gemini.png" alt="">Gemini</div>
+
+  <!-- Middle row -->
+  <div class="box abs" style="left:400px; top:440px; width:320px; height:150px;">
+    <div class="hd"><img class="logo" src="logos/composio.png" alt=""><b>Composio</b></div><p>Third-party connectors to your tools and accounts</p>
+  </div>
+  <div class="box kee abs" style="left:860px; top:400px; width:440px; height:230px;">
+    <div class="hd"><img class="logo" src="logos/keewano.png" alt=""><b>KeewanoDB</b></div>
+    <p style="color:#2a1650; font-weight:600; font-size:19px">DB + agent memory layer</p>
+    <p>Everything your agent knows about you, plus every meeting, verdict and outcome.</p>
+  </div>
+
+  <!-- Lower row -->
+  <div class="box abs" style="left:600px; top:760px; width:320px; height:140px;"><b>Filtering algorithm</b><p>Meet or skip</p></div>
+  <div class="box abs" style="left:1560px; top:720px; width:300px; height:150px;">
+    <div class="hd"><img class="logo" src="logos/fireworks.png" alt=""><b>Signal agent</b></div><p>VC · Muse Glimmer 30B<br>Hosted on Fireworks</p>
+  </div>
+
+  <!-- Dial -->
+  <div class="box dial abs" style="left:600px; top:950px; width:280px; height:90px;">
+    <div class="hd"><img class="logo" src="logos/dial.png" alt=""><b>Dial</b></div><p>Your agent's number</p>
+  </div>
+  <div class="box dial abs" style="left:1100px; top:950px; width:280px; height:90px;">
+    <div class="hd"><img class="logo" src="logos/dial.png" alt=""><b>Dial</b></div><p>Their agent's number</p>
+  </div>
+
+  <!-- Tech stack -->
+  <div class="stack abs" style="left:60px; top:866px; width:500px;">
+    <h3>Tech stack</h3>
+    <div><img src="logos/react.png" alt=""><span><strong>Frontend</strong> · React 19, Vite, three.js, motion</span></div>
+    <div><img src="logos/fireworks.png" alt=""><span><strong>Signal agent</strong> · Muse Glimmer 30B on Fireworks</span></div>
+    <div><img src="logos/composio.png" alt=""><span><strong>Connectors</strong> · Composio</span></div>
+    <div><img src="logos/keewano.png" alt=""><span><strong>DB + agent memory</strong> · KeewanoDB</span></div>
+    <div><img src="logos/dial.png" alt=""><span><strong>Agent-to-agent calls</strong> · Dial</span></div>
+  </div>
+
+  <svg class="abs" style="inset:0" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111"/></marker>
+    </defs>
+    <g fill="none" stroke="#111" stroke-width="2.5">
+      <path d="M720 228H1096" marker-end="url(#a)"/>
+      <path d="M1460 240H1556" marker-end="url(#a)"/>
+      <path d="M1710 720V454" marker-end="url(#a)"/>
+      <path d="M560 300V436" marker-end="url(#a)"/>
+      <path d="M300 356H340M300 418H340M300 480H340M300 542H340M300 604H340M300 666H340M300 728H340M340 356V728M340 515H396" marker-end="url(#a)"/>
+      <path d="M720 515H856" marker-end="url(#a)"/>
+      <path d="M720 272H930V396" marker-end="url(#a)"/>
+      <path d="M1280 310V345H1200V396" marker-end="url(#a)"/>
+      <path d="M1556 410H1480V560H1304" marker-start="url(#a)" marker-end="url(#a)"/>
+      <path d="M760 756V700H1060V634" marker-start="url(#a)" marker-end="url(#a)"/>
+      <path d="M740 900V946" marker-end="url(#a)"/>
+      <path d="M880 995H1096" marker-end="url(#a)" marker-start="url(#a)"/>
+      <path d="M1240 950V634" marker-end="url(#a)"/>
+      <path d="M596 830H30V215H396" marker-end="url(#a)" stroke-width="3"/>
+    </g>
+    <text class="wl-strong" x="820" y="214">Hand to my agent!</text>
+    <text class="wl" x="740" y="260">User defines what a good signal is</text>
+    <text class="wl" x="1292" y="336">fetches founder context</text>
+    <text class="wl" x="772" y="690">fetch conversation information</text>
+    <text class="wl" x="752" y="930">if meet</text>
+    <text class="wl" x="904" y="982">agent-to-agent call</text>
+    <text class="wl-strong" x="120" y="202">yes! / no :(</text>
+  </svg>
+</div>
+</body>
+</html>
