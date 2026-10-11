@@ -37,3 +37,13 @@ export const connectorSetup: Record<SourceId, ConnectorSetup> = {
   discord: { method: 'Personal data export', action: exportAction, steps: ['In Discord, open User Settings → Data & Privacy → Request Data.', 'Download your data package from the email and choose relevant message records.'], docs: 'https://support.discord.com/hc/en-us/articles/360004957991-Your-Discord-Data-Package', note: 'The personal package includes messages you sent, not a complete transcript from every participant.' },
   files: { method: 'File upload', action: 'Use sample files', steps: ['Choose a company brief, deck, exported conversation or dated notes.', 'Review the contents before adding them to your startup memory.'], note: 'This demo uses a sample brief instead of opening a file picker.' }
 };
+
+// With Composio live these three are real connections, not the simulated setup above.
+export const composioSetup = {
+  linkedin: { method: 'Composio connection', steps: ['Approve LinkedIn access in the tab Composio opens.', 'Signal then reads your profile to prefill who you are.'], note: 'A real connection through Composio. You can revoke it from your LinkedIn settings.' },
+  gmail: { method: 'Composio connection', steps: ['Choose your Google account and approve read access to mail in the tab Composio opens.', 'Signal reads recent investor threads into your memory.'], note: 'A real connection through Composio. Signal only reads mail.' },
+  'google-calendar': { method: 'Composio connection', steps: ['Choose your Google account and approve calendar access in the tab Composio opens.', 'Signal reads your coffee chats, and books the ones worth your time.'], note: 'A real connection through Composio.' }
+} satisfies Partial<Record<SourceId, Pick<ConnectorSetup, 'method' | 'steps' | 'note'>>>;
+
+export type ComposioSource = keyof typeof composioSetup;
+export const isComposioSource = (id: SourceId): id is ComposioSource => id in composioSetup;

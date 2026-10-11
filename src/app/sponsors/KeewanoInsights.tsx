@@ -1,7 +1,7 @@
 // What every meet adds up to. This month's run is logged to Keewano as events per person, then a live
 // query across the whole history surfaces the patterns, and you can ask it anything.
 import { useEffect, useState } from 'react';
-import { useProfile } from '../profile';
+import { useRun } from '../run';
 import { api, useApi } from './api';
 import { SponsorTag } from './SponsorTag';
 
@@ -23,13 +23,15 @@ const SUGGESTED = [
 ];
 
 export function KeewanoInsights() {
-  const { meets } = useProfile();
+  const { run: liveRun, meets } = useRun();
   const [logged, setLogged] = useState<string | null>(null);
   const insights = useApi<Insights>('keewano/insights');
   const [showQuery, setShowQuery] = useState(false);
 
   // Log this run's meets once per browser session (the run id makes re-sends idempotent).
+  // A live run's meetings were already logged by the server as they happened.
   useEffect(() => {
+    if (liveRun) return setLogged(`${meets.length} meets from this run logged to Keewano`);
     let run = sessionStorage.getItem(RUN_KEY);
     if (!run) {
       run = crypto.randomUUID();
@@ -41,7 +43,7 @@ export function KeewanoInsights() {
     })
       .then(r => setLogged(`${r.people} meets from this run logged to Keewano`))
       .catch(() => setLogged(null));
-  }, [meets]);
+  }, [liveRun, meets]);
 
   return (
     <section className="sponsor card">

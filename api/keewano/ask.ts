@@ -2,9 +2,9 @@
 // history by querying Keewano live through its MCP server.
 import { createMCPClient } from '@ai-sdk/mcp';
 import { generateText, isStepCount } from 'ai';
-import { MODEL } from '../../server/agent';
 import { HttpError, body, json, route } from '../../server/http';
 import { MCP_URL, mcpHeaders } from '../../server/keewano';
+import { model } from '../../server/model';
 
 const SYSTEM = `You answer questions about a founder's networking history, stored in Keewano.
 Each Keewano user is one person the founder's agent screened. Their events, in order:
@@ -22,7 +22,7 @@ export const POST = route(async req => {
   try {
     const tools = await mcp.tools();
     const result = await generateText({
-      model: MODEL,
+      model: model(),
       system: SYSTEM,
       tools,
       stopWhen: isStepCount(8),

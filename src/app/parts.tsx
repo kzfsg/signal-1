@@ -17,8 +17,11 @@ export function VerdictBadge({ verdict }: { verdict: Meet['verdict'] }) {
 
 type CalendarMode = 'packed' | 'compressing' | 'filtered';
 
+/** Calendar slots: a Meet, or a Chat the agent hasn't met yet (no verdict). */
+export type Slotted = Pick<Meet, 'id' | 'person' | 'week' | 'day' | 'start'> & { verdict?: Meet['verdict'] };
+
 /** A month of coffee chats, Mon–Fri across four weeks. `filtered` dims everything the agent skipped. */
-export function Calendar({ meets, mode = 'packed', compact = false }: { meets: Meet[]; mode?: CalendarMode; compact?: boolean }) {
+export function Calendar({ meets, mode = 'packed', compact = false }: { meets: Slotted[]; mode?: CalendarMode; compact?: boolean }) {
   return (
     <div className={`cal cal--${mode}${compact ? ' cal--compact' : ''}`} role="table" aria-label="One month of coffee chats">
       <div className="cal__row cal__row--head" role="row">
@@ -35,7 +38,7 @@ export function Calendar({ meets, mode = 'packed', compact = false }: { meets: M
                 .map(m => (
                   <div
                     key={m.id}
-                    className={`cal__event cal__event--${m.person.kind} cal__event--${m.verdict}`}
+                    className={`cal__event cal__event--${m.person.kind}${m.verdict ? ` cal__event--${m.verdict}` : ''}`}
                     style={{ '--i': meets.indexOf(m) } as CSSProperties}
                     title={`${formatTime(m.start)}, ${m.person.name}, ${m.person.org}`}
                   >

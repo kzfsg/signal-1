@@ -20,7 +20,9 @@ Signal gives every founder a personal agent that knows them. That agent meets ot
 | --- | --- |
 | Signal app: login, LinkedIn step, 4-question intake, calendar of 48 chats, compress animation, live run, results with notes and trace | Built. Frontend only (`src/app/App.tsx`, `LiveRun.tsx`, `Results.tsx`) |
 | `Meet`, `checks`, `shared`, `withheld`, `trace`, `verdict`, `notes` data shapes | Built as hardcoded demo data in `src/app/data.ts` |
-| Signal agents on Fireworks, Composio connectors, KeewanoDB, Dial calls, filtering algorithm | Proposed. The repo has no backend yet |
+| Signal agents on Fireworks, Composio connectors, KeewanoDB memory, Dial agent-to-agent turns | Built (`server/`, `api/`). Each service switches on when its key is in `.env.local` (see `.env.example`); without keys the app plays the scripted demo month |
+| Filtering algorithm | Built. Jev (`typesafe/jev-router` on OpenRouter) gets your criteria and the logged conversation and makes the meet or skip call (`server/filter.ts`) |
+| Proof without keys | `npm run e2e` runs the whole pipeline against a local fake of the model endpoints (`scripts/fake-fireworks.ts`) |
 
 The prototype's `Meet` type is already the output contract of the target system. The backend has to produce those shapes, and the UI does not need to change.
 

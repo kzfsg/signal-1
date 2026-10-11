@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, Wordmark } from '@/signal';
-import { questionnaire, totals } from './data';
+import { questionnaire, totalsOf } from './data';
 import { agentName, useProfile } from './profile';
+import { linkedinProfile, listConnections, profilePatch, useServices } from './live';
+import { useRun } from './run';
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
@@ -27,6 +29,7 @@ function readStep(): Step {
 
 export default function App() {
   const { user } = useProfile();
+  useServices();
   const [step, setStep] = useState<Step>(readStep);
 
   useEffect(() => {
@@ -105,9 +108,19 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
   const { user, setUser, resetUser } = useProfile();
   const [state, setState] = useState<'idle' | 'importing' | 'done'>('idle');
 
-  const start = () => {
+  const { services } = useServices();
+
+  const start = async () => {
     setState('importing');
-    setTimeout(() => setState('done'), 1100);
+    const minimum = new Promise(done => setTimeout(done, 1100));
+    if (services.composio) {
+      try {
+        const linked = (await listConnections()).some(c => c.source === 'linkedin' && c.status === 'active');
+        if (linked) setUser(profilePatch(await linkedinProfile()));
+      } catch { /* The profile on screen stays as it was. */ }
+    }
+    await minimum;
+    setState('done');
   };
 
   return (
@@ -267,8 +280,16 @@ function Questions({ onDone }: { onDone: () => void }) {
 }
 
 function ConnectCalendar({ onDone }: { onDone: () => void }) {
-  const { meets } = useProfile();
+  const { plan, run, begin } = useRun();
+  const { services, ready } = useServices();
   const [connected, setConnected] = useState(() => loadDraft().sources.includes('google-calendar'));
+  const [failed, setFailed] = useState(false);
+  const live = ready && services.fireworks;
+  const waiting = connected && (!ready || (live && !run && !failed));
+  const totals = totalsOf(plan);
+  useEffect(() => {
+    if (connected && live && !run) begin().catch(() => setFailed(true));
+  }, [connected, live, run, begin]);
   const connect = () => {
     setConnected(true);
     const draft = loadDraft();
@@ -291,11 +312,13 @@ function ConnectCalendar({ onDone }: { onDone: () => void }) {
         <div className="card form-card">
           <button className="btn btn--ink" onClick={connect}>Connect Google Calendar</button>
         </div>
+      ) : waiting ? (
+        <p className="t-body t-muted" role="status">Reading your calendar…</p>
       ) : (
         <>
-          <Calendar meets={meets} />
+          <Calendar meets={plan} />
           <div className="panel__actions">
-            <button className="btn btn--ink" onClick={onDone}>Hand these to my agent</button>
+            <button className="btn btn--ink" onClick={onDone}>Hand to my agent!</button>
           </div>
         </>
       )}
@@ -304,7 +327,8 @@ function ConnectCalendar({ onDone }: { onDone: () => void }) {
 }
 
 function Compress({ onDone }: { onDone: () => void }) {
-  const { meets } = useProfile();
+  const { plan } = useRun();
+  const totals = totalsOf(plan);
   const [phase, setPhase] = useState<'packed' | 'compressing' | 'done'>('packed');
 
   useEffect(() => {
@@ -320,7 +344,7 @@ function Compress({ onDone }: { onDone: () => void }) {
     <section className="panel panel--wide compress">
       <div className="compress__stage">
         <div className={`compress__cal${phase === 'done' ? ' compress__cal--gone' : ''}`}>
-          <Calendar meets={meets} mode={phase === 'packed' ? 'packed' : 'compressing'} />
+          <Calendar meets={plan} mode={phase === 'packed' ? 'packed' : 'compressing'} />
         </div>
 
         {phase === 'done' && (
