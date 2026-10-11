@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { assembleMemory, createBrief, emptyDraft, loadDraft, memoryFields, sessionsForProfile, sources, storageKey, type SourceId } from './memoryData';
 import { useProfile } from './profile';
+import { importItems, listConnections, saveMemory, useServices, type ContextItem } from './live';
+import { isComposioSource } from './connectorSetup';
 import SourcePicker from './SourcePicker';
 import ContextImport from './ContextImport';
 import MemoryDocument from './MemoryDocumentView';
@@ -17,6 +19,11 @@ export default function MemoryOnboarding({ step, go }: { step: MemoryStep; go: (
   const [busy, setBusy] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [documentValid, setDocumentValid] = useState(true);
+  const { services } = useServices();
+  const [real, setReal] = useState<{ items: ContextItem[] } | { error: string } | 'loading' | null>(null);
+  const [saving, setSaving] = useState<'idle' | 'saving' | 'failed'>('idle');
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (step !== 'sessions') setBusy(false); if (step !== 'memory') setDocumentValid(true); }, [step]);
   useEffect(() => { heading.current?.focus(); }, [step]);
@@ -31,6 +38,36 @@ export default function MemoryOnboarding({ step, go }: { step: MemoryStep; go: (
   const importSamples = () => {
     setBusy(true);
     go('sessions');
+    if (services.composio) void importReal();
+  };
+  // Real items come from the connections that are active on Composio and still selected here.
+  const importReal = async () => {
+    setReal('loading');
+    try {
+      const active = (await listConnections()).filter(c => c.status === 'active' && draft.sources.includes(c.source)).map(c => c.source).filter(isComposioSource);
+      setReal(active.length ? await importItems(active) : null);
+    } catch (e) {
+      setReal({ error: (e as Error).message });
+    }
+  };
+  const saveAndContinue = async () => {
+    const next = { ...draft, saved: true };
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); setDraft(next); } catch { setStorageError(true); return; }
+    if (services.fireworks || services.keewano) {
+      setSaving('saving');
+      try {
+        await saveMemory({
+          profile: { name: user.name, company: user.company, pitch: user.pitch, headline: user.headline, location: user.location, experience: user.experience.filter(e => e.trim()) },
+          signals: { goals: chosen.goal ?? [], meet: chosen.meet ?? [], skip: chosen.skip ?? [], context },
+          brief: draft.brief
+        });
+        setSaving('idle');
+      } catch {
+        setSaving('failed');
+        await new Promise(r => setTimeout(r, 1800));
+      }
+    }
+    if (alive.current) go('calendar');
   };
   const finishImport = () => {
     setDraft(d => ({ ...d, included: suggested.map(s => s.id), generated: false, saved: false }));
@@ -77,6 +114,13 @@ export default function MemoryOnboarding({ step, go }: { step: MemoryStep; go: (
 
       {step === 'sessions' && !busy && <>
         <div className="memory-review-summary"><p><strong>{available.length}</strong> sample items found</p><p><strong>{suggested.length}</strong> suggested as relevant</p><p><strong>{included.length}</strong> selected for memory</p></div>
+        {real === 'loading' && <p className="t-small t-muted" role="status">Importing from your connected apps…</p>}
+        {real && real !== 'loading' && ('error' in real
+          ? <p className="t-small" role="status">Couldn’t import from your connected apps ({real.error}). The sample review below still works.</p>
+          : <div className="memory-session-list">
+            <h2 className="t-title">{services.keewano ? 'Imported into KeewanoDB' : 'Imported into your memory'} · {real.items.length} items from your apps</h2>
+            {real.items.map((item, i) => <article className="memory-session" key={`${item.source}-${i}`}><div><div className="memory-session-meta"><span>{sources.find(source => source.id === item.source)?.name ?? item.source}</span></div><h2>{item.title}</h2><p>{item.text.length > 240 ? `${item.text.slice(0, 240)}…` : item.text}</p></div></article>)}
+          </div>)}
         <p className="t-small t-muted">Classification and extraction are scripted for this demo. Expand an item to inspect its evidence. Unrelated and uncertain items start excluded.</p>
         <div className="memory-session-list">
           {available.map(s => <article className="memory-session" key={s.id}>
@@ -100,8 +144,9 @@ export default function MemoryOnboarding({ step, go }: { step: MemoryStep; go: (
             for (const { id } of memoryFields) if (brief[id] !== d.brief[id]) editedAt[id] = now;
             return { ...d, brief, editedAt, saved: false };
           })} />
-          <div className="memory-footer"><button className="btn btn--line" onClick={() => go(available.length ? 'sessions' : 'sources')}>Back to context</button><div className="memory-footer-actions"><span className="t-small t-muted">You can return to edit this memory.</span><button className="btn btn--ink" disabled={!documentValid || !draft.brief.company.trim()} onClick={() => { const next = { ...draft, saved: true }; try { localStorage.setItem(storageKey, JSON.stringify(next)); setDraft(next); go('calendar'); } catch { setStorageError(true); } }}>Save memory & continue</button></div></div>
+          <div className="memory-footer"><button className="btn btn--line" onClick={() => go(available.length ? 'sessions' : 'sources')}>Back to context</button><div className="memory-footer-actions"><span className="t-small t-muted">You can return to edit this memory.</span><button className="btn btn--ink" disabled={!documentValid || !draft.brief.company.trim() || saving === 'saving'} onClick={saveAndContinue}>{saving === 'saving' ? 'Saving…' : 'Save memory & continue'}</button></div></div>
           {!draft.brief.company.trim() && <p className="t-small">Add what you’re building to continue.</p>}
+          {saving === 'failed' && <p className="t-small" role="status">Couldn’t reach your agent’s memory, so it’s saved only in this browser. Continuing.</p>}
         </>}
       </>}
     </section>

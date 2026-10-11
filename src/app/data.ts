@@ -483,19 +483,24 @@ function buildMonth(): Meet[] {
 
 export const meets = buildMonth();
 
-export const totals = (() => {
-  const minutes = meets.reduce((sum, m) => sum + m.minutes, 0);
-  const agentSeconds = meets.reduce((sum, m) => sum + m.agentSeconds, 0);
-  const keep = meets.filter(m => m.verdict === 'meet');
+// Chats the agent hasn't met yet carry no agentSeconds or verdict; they count with a typical meet's length.
+const TYPICAL_AGENT_SECONDS = 20;
+
+export function totalsOf(list: (Pick<Meet, 'minutes'> & Partial<Pick<Meet, 'agentSeconds' | 'verdict'>>)[]) {
+  const minutes = list.reduce((sum, m) => sum + m.minutes, 0);
+  const agentSeconds = list.reduce((sum, m) => sum + (m.agentSeconds ?? TYPICAL_AGENT_SECONDS), 0);
+  const keep = list.filter(m => m.verdict === 'meet');
   return {
-    count: meets.length,
+    count: list.length,
     hours: Math.round(minutes / 60),
     agentMinutes: Math.round(agentSeconds / 60),
     keep: keep.length,
     keepHours: Math.round(keep.reduce((s, m) => s + m.minutes, 0) / 60),
     savedHours: Math.round((minutes - keep.reduce((s, m) => s + m.minutes, 0)) / 60)
   };
-})();
+}
+
+export const totals = totalsOf(meets);
 
 export const kindLabel: Record<Kind, string> = {
   vc: 'Investor',

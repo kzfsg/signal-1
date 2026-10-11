@@ -1,25 +1,30 @@
 import { useState } from 'react';
-import { totals, dayNames, formatTime } from './data';
-import { useProfile } from './profile';
+import { totalsOf, dayNames, formatTime } from './data';
+import { useRun } from './run';
 import { Avatar, Calendar, NotesCard, TracePanel, VerdictBadge } from './parts';
 import { DialLine, TextFollowUp } from './sponsors/DialLine';
 import { KeewanoInsights } from './sponsors/KeewanoInsights';
 import './sponsors/sponsors.css';
 
+const SPELLED = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+
 export default function Results() {
-  const { meets } = useProfile();
+  const { meets, run } = useRun();
+  const totals = totalsOf(meets);
   const keep = meets.filter(m => m.verdict === 'meet');
   const skipped = meets.filter(m => m.verdict === 'skip');
   const [tab, setTab] = useState<'meet' | 'skip'>('meet');
   const list = tab === 'meet' ? keep : skipped;
-  const [selected, setSelected] = useState(keep[0].id);
-  const meet = meets.find(m => m.id === selected) ?? list[0];
+  const [selected, setSelected] = useState(keep[0]?.id);
+  const meet = meets.find(m => m.id === selected) ?? list[0] ?? meets[0];
   const [view, setView] = useState<'notes' | 'trace'>('notes');
 
   const pick = (t: 'meet' | 'skip') => {
     setTab(t);
-    setSelected((t === 'meet' ? keep : skipped)[0].id);
+    setSelected((t === 'meet' ? keep : skipped)[0]?.id);
   };
+
+  if (!meet) return <section className="results"><p className="t-body t-muted" role="status">{run ? 'Your agent is still meeting people. Come back as the first notes land.' : 'No meets yet.'}</p></section>;
 
   return (
     <section className="results">
@@ -78,7 +83,7 @@ export default function Results() {
       <div className="results__month">
         <div>
           <h2 className="t-headline">Your new month.</h2>
-          <p className="t-body t-muted">Six coffees instead of {totals.count}. Your agent proposed times; everyone else got a note.</p>
+          <p className="t-body t-muted">{SPELLED[totals.keep] ?? totals.keep} {totals.keep === 1 ? 'coffee' : 'coffees'} instead of {totals.count}. Your agent proposed times; everyone else got a note.</p>
           <ul className="rule-list results__booked">
             {keep.map(m => (
               <li key={m.id}>

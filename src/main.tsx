@@ -5,6 +5,7 @@ import Landing from './site/Landing';
 import App from './app/App';
 import Catalogue from './docs/Catalogue';
 import { ProfileProvider } from './app/profile';
+import { RunProvider } from './app/run';
 
 type Route = 'landing' | 'app' | 'system';
 
@@ -37,7 +38,9 @@ function Root() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ProfileProvider>
-      <Root />
+      <RunProvider>
+        <Root />
+      </RunProvider>
     </ProfileProvider>
   </StrictMode>
 );
