@@ -94,6 +94,10 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
                   <Avatar name={current.person.name} kind={current.person.kind} size={40} />
                 </div>
               </header>
+              <p className="live__via">
+                <span className="live__via-tag">Agent to agent</span>
+                <span>No agent on their side? Yours calls or texts them with <strong>Dial</strong>.</span>
+              </p>
 
               <div className="live__transcript" ref={roomRef}>
                 {script.slice(0, lines).map(([who, text], i) => (

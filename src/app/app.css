@@ -228,7 +228,7 @@
 
 @keyframes live-pulse { 50% { opacity: 0.35; } }
 
-.live__room { display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+.live__room { display: grid; grid-template-rows: auto auto 1fr; min-height: 0; }
 
 .live__room-head {
   display: flex;
@@ -241,6 +241,20 @@
 .live__agent { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
 .live__agent--them { justify-content: flex-end; text-align: right; }
 .live__agent .t-small { color: rgb(255 255 255 / 0.6); }
+
+.live__via {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  margin: 0;
+  padding: 0.6rem 1.5rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 0.65);
+}
+.live__via strong { color: var(--white); }
+.live__via-tag { padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--grad-holo); color: var(--ink); font-weight: 600; }
 
 .live__link {
   flex: 1;
