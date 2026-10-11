@@ -43,9 +43,6 @@ export function KeewanoInsights() {
       .catch(() => setLogged(null));
   }, [meets]);
 
-  // Only appears once Keewano is set up and answering.
-  if (!insights.data) return null;
-
   return (
     <section className="sponsor card">
       <header className="sponsor__head">
@@ -125,7 +122,7 @@ function Ask() {
           {answer.calls.length > 0 && <p className="t-small t-muted">Answered from {answer.calls.length} live Keewano {answer.calls.length === 1 ? 'query' : 'queries'}: {[...new Set(answer.calls.map(c => c.tool))].join(', ')}</p>}
         </div>
       )}
-      {error && <p className="t-small dial__error">Couldn’t answer that: {error}</p>}
+      {error && <p className="t-small dial__error">{error}</p>}
     </div>
   );
 }

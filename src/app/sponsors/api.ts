@@ -8,6 +8,8 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
     body: JSON.stringify(body)
   });
   const data = await res.json().catch(() => ({ error: `${res.status} ${res.statusText}` }));
+  // 503 means a service isn't set up on this deployment; keep the setup details in the server logs.
+  if (res.status === 503) throw new Error('That didn’t go through. Try again in a moment.');
   if (!res.ok) throw new Error(data.error ?? `${res.status}`);
   return data as T;
 }

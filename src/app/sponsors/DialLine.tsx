@@ -25,9 +25,6 @@ export function DialLine() {
   const line = useApi<NumberInfo>('dial/number');
   const inbox = useApi<Inbox>(line.data ? 'dial/inbox' : null, 4000);
 
-  // Only appears once Dial is set up; until then the page simply doesn't mention it.
-  if (!line.data) return null;
-
   return (
     <section className="sponsor card">
       <header className="sponsor__head">
@@ -39,11 +36,13 @@ export function DialLine() {
             and follows up by text either way.
           </p>
         </div>
-        <div className="dial__number">
-          <span className="t-label t-muted">Text or call your agent</span>
-          <p className="t-headline">{pretty(line.data.number)}</p>
-          {!line.data.ready && <span className="t-small t-muted">Finishing setup, texts work now</span>}
-        </div>
+        {line.data && (
+          <div className="dial__number">
+            <span className="t-label t-muted">Text or call your agent</span>
+            <p className="t-headline">{pretty(line.data.number)}</p>
+            {!line.data.ready && <span className="t-small t-muted">Finishing setup, texts work now</span>}
+          </div>
+        )}
       </header>
 
       <div className="dial__grid">
@@ -51,7 +50,7 @@ export function DialLine() {
         <div className="dial__inbox">
           <span className="t-label t-muted">Live inbox</span>
           {!inbox.data?.threads.length ? (
-            <p className="t-small t-muted">No texts yet. Text {pretty(line.data.number)} and watch your agent screen you here.</p>
+            <p className="t-small t-muted">No texts yet.{line.data && ` Text ${pretty(line.data.number)} and watch your agent screen you here.`}</p>
           ) : (
             <ul className="dial__threads">
               {inbox.data.threads.map(t => (
@@ -143,7 +142,6 @@ function CallSomeone() {
 /** Text the person the booking or the kind "not right now", from the agent's number. */
 export function TextFollowUp({ meet }: { meet: Meet }) {
   const { first } = useProfile();
-  const line = useApi<NumberInfo>('dial/number');
   const them = meet.person.name.split(' ')[0];
   const draft = meet.verdict === 'meet'
     ? `Hi ${them}, ${first}'s assistant here. ${first} would love to meet: does ${dayName(meet)} at ${time(meet)} work for 30 minutes? Reply and I'll lock it in.`
@@ -166,8 +164,6 @@ export function TextFollowUp({ meet }: { meet: Meet }) {
       setState({ error: (e as Error).message });
     }
   };
-
-  if (!line.data) return null;
 
   return (
     <div className="card followup">
