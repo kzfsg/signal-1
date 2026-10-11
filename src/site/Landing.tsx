@@ -9,7 +9,7 @@ const steps = [
   {
     n: '1',
     title: 'Your agent learns you',
-    body: 'Connect LinkedIn and answer four questions: what you’re after, who you’d love to meet, and who isn’t a fit right now.'
+    body: 'Your agent pulls what it needs from LinkedIn, your Claude chats and your personal agents into one Keewano database.'
   },
   {
     n: '2',
