@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, Wordmark } from '@/signal';
 import { questionnaire, totals } from './data';
-import { useProfile } from './profile';
+import { agentLabel, agentName, useProfile, type AgentProvider } from './profile';
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
@@ -166,12 +166,89 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
           </div>
         )}
       </div>
+
+      <ConnectAgent />
     </section>
   );
 }
 
+function ConnectAgent() {
+  const { agent, setAgent } = useProfile();
+  const [picked, setPicked] = useState<AgentProvider>(agent?.provider ?? 'claude');
+  const [endpoint, setEndpoint] = useState(agent?.endpoint ?? '');
+  const [connecting, setConnecting] = useState(false);
+
+  const validEndpoint = /^(https:\/\/|mcp:\/\/|wss:\/\/)\S+$/.test(endpoint.trim());
+  const canConnect = picked !== 'custom' || validEndpoint;
+
+  const connect = () => {
+    setConnecting(true);
+    setTimeout(() => {
+      setAgent(picked === 'custom' ? { provider: 'custom', endpoint: endpoint.trim() } : { provider: picked });
+      setConnecting(false);
+    }, 900);
+  };
+
+  return (
+    <div className="card form-card agent-connect">
+      <div>
+        <p className="t-title">Already have a personal agent?</p>
+        <p className="t-small t-muted">
+          Connect it and Signal sends your meets through it, so it speaks with the memory and tone you’ve already set up.
+          Skip this and Signal builds one for you.
+        </p>
+      </div>
+
+      {agent ? (
+        <div className="agent-connect__done">
+          <span className="agent-connect__dot" aria-hidden="true" />
+          <p className="t-small">
+            <strong>{agentLabel[agent.provider]} connected</strong>
+            {agent.endpoint && <span className="t-muted"> · {agent.endpoint}</span>}
+          </p>
+          <button className="btn btn--line" onClick={() => setAgent(null)}>Disconnect</button>
+        </div>
+      ) : (
+        <>
+          <div className="chips" role="radiogroup" aria-label="Personal agent">
+            {(Object.keys(agentLabel) as AgentProvider[]).map(p => (
+              <button
+                key={p}
+                type="button"
+                role="radio"
+                aria-checked={picked === p}
+                className={`chip${picked === p ? ' chip--on' : ''}`}
+                onClick={() => setPicked(p)}
+                disabled={connecting}
+              >
+                {agentLabel[p]}
+              </button>
+            ))}
+          </div>
+          {picked === 'custom' && (
+            <label className="field">
+              <span className="t-label">Agent endpoint (MCP or HTTPS)</span>
+              <input
+                placeholder="https://agent.example.com/mcp"
+                value={endpoint}
+                onChange={e => setEndpoint(e.target.value)}
+                disabled={connecting}
+              />
+            </label>
+          )}
+          <div>
+            <button className="btn btn--ink" onClick={connect} disabled={!canConnect || connecting}>
+              {connecting ? 'Connecting…' : `Connect ${agentLabel[picked]}`}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Questions({ onDone }: { onDone: () => void }) {
-  const { user, first, options, chosen, toggle, addOption, context, setContext } = useProfile();
+  const { user, first, agent, options, chosen, toggle, addOption, context, setContext } = useProfile();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const add = (id: string) => {
@@ -227,7 +304,7 @@ function Questions({ onDone }: { onDone: () => void }) {
               <Avatar name={user.name} kind="you" size={44} />
               <div>
                 <p className="t-title">{first}’s agent</p>
-                <p className="t-small">Mirrors what you’re looking for</p>
+                <p className="t-small">{agent ? `Runs on your ${agentName(agent)}` : 'Mirrors what you’re looking for'}</p>
               </div>
             </div>
             {[

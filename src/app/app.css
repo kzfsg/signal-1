@@ -366,3 +366,11 @@
   .results__month { grid-template-columns: 1fr; }
   .results__list { position: static; }
 }
+
+/* Personal agent ----------------------------------------------------------- */
+
+.agent-connect { gap: 1rem; }
+.app .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.agent-connect__done { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.agent-connect__done p { flex: 1; margin: 0; overflow-wrap: anywhere; }
+.agent-connect__dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--grad-sr); box-shadow: 0 0 0 3px var(--ink-10); }
