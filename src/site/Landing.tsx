@@ -9,7 +9,7 @@ const steps = [
   {
     n: '1',
     title: 'Your agent learns you',
-    body: 'Your agent pulls what it needs from LinkedIn, your Claude chats and your personal agents into one Keewano database.'
+    body: 'Start with LinkedIn and your goals, then bring context from your assistants and conversations to build your agent’s personal memory.'
   },
   {
     n: '2',

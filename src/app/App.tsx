@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, Wordmark } from '@/signal';
 import { questionnaire, totals } from './data';
-import { agentLabel, agentName, useProfile, type AgentProvider } from './profile';
+import { agentName, useProfile } from './profile';
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
+import MemoryOnboarding from './MemoryOnboarding';
+import { loadDraft, storageKey } from './memoryData';
 import './app.css';
 
-export type Step = 'login' | 'linkedin' | 'questions' | 'calendar' | 'compress' | 'live' | 'results';
+export type Step = 'login' | 'linkedin' | 'questions' | 'sources' | 'sessions' | 'memory' | 'calendar' | 'compress' | 'live' | 'results';
 
 const STAGES: [label: string, steps: Step[]][] = [
   ['Profile', ['linkedin', 'questions']],
+  ['Personal context', ['sources', 'sessions', 'memory']],
   ['Calendar', ['calendar', 'compress']],
   ['Agent meets', ['live']],
   ['Results', ['results']]
@@ -18,7 +21,7 @@ const STAGES: [label: string, steps: Step[]][] = [
 
 function readStep(): Step {
   const s = window.location.hash.split('/')[2] as Step | undefined;
-  const all: Step[] = ['login', 'linkedin', 'questions', 'calendar', 'compress', 'live', 'results'];
+  const all: Step[] = ['login', 'linkedin', 'questions', 'sources', 'sessions', 'memory', 'calendar', 'compress', 'live', 'results'];
   return s && all.includes(s) ? s : 'login';
 }
 
@@ -46,9 +49,12 @@ export default function App() {
       <header className="app__bar">
         <a href="#/" aria-label="signal home"><Wordmark size="1.4rem" /></a>
         <ol className="app__stages" aria-label="Progress">
-          {STAGES.map(([label], i) => (
-            <li key={label} className={i < stageIndex ? 'done' : i === stageIndex ? 'current' : ''} aria-current={i === stageIndex ? 'step' : undefined}>
-              <span className="app__stage-n">{i + 1}</span> {label}
+          {STAGES.map(([label, steps], i) => (
+            <li key={label} className={i < stageIndex ? 'done' : i === stageIndex ? 'current' : ''}>
+              <button type="button" className="app__stage-button" onClick={() => go(steps[0])} aria-label={`${i + 1}. ${label}`} aria-current={i === stageIndex ? 'step' : undefined}>
+                <span className="app__stage-n" aria-hidden="true">{i + 1}</span>
+                <span className="app__stage-label">{label}</span>
+              </button>
             </li>
           ))}
         </ol>
@@ -59,8 +65,13 @@ export default function App() {
       </header>
 
       <main className="app__main">
-        {step === 'linkedin' && <LinkedIn onDone={() => go('questions')} />}
-        {step === 'questions' && <Questions onDone={() => go('calendar')} />}
+        {step === 'linkedin' && <LinkedIn onDone={() => {
+          const draft = loadDraft();
+          try { localStorage.setItem(storageKey, JSON.stringify({ ...draft, sources: [...new Set([...draft.sources, 'linkedin'])] })); } catch { /* Source selection remains optional when storage is unavailable. */ }
+          go('questions');
+        }} />}
+        {step === 'questions' && <Questions onDone={() => go('sources')} />}
+        {(step === 'sources' || step === 'sessions' || step === 'memory') && <MemoryOnboarding step={step} go={go} />}
         {step === 'calendar' && <ConnectCalendar onDone={() => go('compress')} />}
         {step === 'compress' && <Compress onDone={() => go('live')} />}
         {step === 'live' && <LiveRun onDone={() => go('results')} />}
@@ -167,83 +178,7 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
         )}
       </div>
 
-      <ConnectAgent />
     </section>
-  );
-}
-
-function ConnectAgent() {
-  const { agent, setAgent } = useProfile();
-  const [picked, setPicked] = useState<AgentProvider>(agent?.provider ?? 'claude');
-  const [endpoint, setEndpoint] = useState(agent?.endpoint ?? '');
-  const [connecting, setConnecting] = useState(false);
-
-  const validEndpoint = /^(https:\/\/|mcp:\/\/|wss:\/\/)\S+$/.test(endpoint.trim());
-  const canConnect = picked !== 'custom' || validEndpoint;
-
-  const connect = () => {
-    setConnecting(true);
-    setTimeout(() => {
-      setAgent(picked === 'custom' ? { provider: 'custom', endpoint: endpoint.trim() } : { provider: picked });
-      setConnecting(false);
-    }, 900);
-  };
-
-  return (
-    <div className="card form-card agent-connect">
-      <div>
-        <p className="t-title">Already have a personal agent?</p>
-        <p className="t-small t-muted">
-          Connect it and Signal sends your meets through it, so it speaks with the memory and tone you’ve already set up.
-          Skip this and Signal builds one for you.
-        </p>
-      </div>
-
-      {agent ? (
-        <div className="agent-connect__done">
-          <span className="agent-connect__dot" aria-hidden="true" />
-          <p className="t-small">
-            <strong>{agentLabel[agent.provider]} connected</strong>
-            {agent.endpoint && <span className="t-muted"> · {agent.endpoint}</span>}
-          </p>
-          <button className="btn btn--line" onClick={() => setAgent(null)}>Disconnect</button>
-        </div>
-      ) : (
-        <>
-          <div className="chips" role="radiogroup" aria-label="Personal agent">
-            {(Object.keys(agentLabel) as AgentProvider[]).map(p => (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={picked === p}
-                className={`chip${picked === p ? ' chip--on' : ''}`}
-                onClick={() => setPicked(p)}
-                disabled={connecting}
-              >
-                {agentLabel[p]}
-              </button>
-            ))}
-          </div>
-          {picked === 'custom' && (
-            <label className="field">
-              <span className="t-label">Agent endpoint (MCP or HTTPS)</span>
-              <input
-                placeholder="https://agent.example.com/mcp"
-                value={endpoint}
-                onChange={e => setEndpoint(e.target.value)}
-                disabled={connecting}
-              />
-            </label>
-          )}
-          <div>
-            <button className="btn btn--ink" onClick={connect} disabled={!canConnect || connecting}>
-              {connecting ? 'Connecting…' : `Connect ${agentLabel[picked]}`}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
   );
 }
 
@@ -324,7 +259,7 @@ function Questions({ onDone }: { onDone: () => void }) {
               </div>
             )}
           </div>
-          <button className="btn btn--ink mirror__btn" onClick={onDone}>Build my agent</button>
+          <button className="btn btn--ink mirror__btn" onClick={onDone}>Continue to personal context</button>
         </aside>
       </div>
     </section>
@@ -333,7 +268,12 @@ function Questions({ onDone }: { onDone: () => void }) {
 
 function ConnectCalendar({ onDone }: { onDone: () => void }) {
   const { meets } = useProfile();
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(() => loadDraft().sources.includes('google-calendar'));
+  const connect = () => {
+    setConnected(true);
+    const draft = loadDraft();
+    try { localStorage.setItem(storageKey, JSON.stringify({ ...draft, sources: [...new Set([...draft.sources, 'google-calendar'])] })); } catch { /* This demo connection can still last for the current screen. */ }
+  };
 
   return (
     <section className="panel panel--wide">
@@ -346,9 +286,10 @@ function ConnectCalendar({ onDone }: { onDone: () => void }) {
         </p>
       </div>
 
+      {loadDraft().saved && <div className="memory-saved-note"><span>Your personal context is ready.</span><a href="#/app/memory">Review memory</a></div>}
       {!connected ? (
         <div className="card form-card">
-          <button className="btn btn--ink" onClick={() => setConnected(true)}>Connect Google Calendar</button>
+          <button className="btn btn--ink" onClick={connect}>Connect Google Calendar</button>
         </div>
       ) : (
         <>
