@@ -7,6 +7,7 @@ import { crc32 } from 'node:zlib';
 import pg from 'pg';
 import { HttpError } from './dial';
 import type { Decision } from './agent';
+import type { ContextItem, FounderMemory } from './signal';
 
 const INGEST = 'https://api.keewano.com/event/ingress/v1/json';
 export const MCP_URL = 'https://api.keewano.com/mcp';
@@ -21,7 +22,21 @@ export const EVENT_TYPES = [
   { eventTypeId: 2004, name: 'failed_check', dataType: 'string' },
   { eventTypeId: 2005, name: 'agent_seconds', dataType: 'uint' },
   { eventTypeId: 2006, name: 'human_met', dataType: 'bool' },
-  { eventTypeId: 2007, name: 'outcome', dataType: 'string' }
+  { eventTypeId: 2007, name: 'outcome', dataType: 'string' },
+  // The founder's memory (entity founder:<userId>) and the agent-to-agent meeting room (entity meet:<meetingId>).
+  { eventTypeId: 2008, name: 'memory_saved', dataType: 'uint' },
+  { eventTypeId: 2009, name: 'profile_name', dataType: 'string' },
+  { eventTypeId: 2010, name: 'profile_company', dataType: 'string' },
+  { eventTypeId: 2011, name: 'profile_pitch', dataType: 'string' },
+  { eventTypeId: 2012, name: 'signal_goal', dataType: 'string' },
+  { eventTypeId: 2013, name: 'signal_meet', dataType: 'string' },
+  { eventTypeId: 2014, name: 'signal_skip', dataType: 'string' },
+  { eventTypeId: 2015, name: 'signal_context', dataType: 'string' },
+  { eventTypeId: 2016, name: 'memory_fact', dataType: 'string' },
+  { eventTypeId: 2017, name: 'turn_you', dataType: 'string' },
+  { eventTypeId: 2018, name: 'turn_them', dataType: 'string' },
+  { eventTypeId: 2019, name: 'confidence', dataType: 'uint' },
+  { eventTypeId: 2020, name: 'booked_slot', dataType: 'string' }
 ] as const;
 
 type EventName = (typeof EVENT_TYPES)[number]['name'];
@@ -68,14 +83,14 @@ export function registerEvents() {
 
 /**
  * Send one person's events. `session` names this batch of history so a retry is never counted twice;
- * events must be in time order.
+ * events must be in time order. A session that grows over time (a meeting's turns) sends batch 1, 2, 3…
  */
-export async function ingest(person: string, session: string, events: KEvent[]) {
+export async function ingest(person: string, session: string, events: KEvent[], batch = 1) {
   if (!events.length) return { received: 0, accepted: 0 };
   const sorted = [...events].sort((a, b) => a.at - b.at);
   const result = await post('in', {
     dataSessionId: entityId(`session:${session}`),
-    batch: 1,
+    batch,
     customEventsHash: EVENTS_HASH,
     installId: entityId(person),
     events: sorted.map(e => ({
@@ -108,6 +123,39 @@ export function meetEvents(m: {
     ...(m.agentSeconds ? [{ name: 'agent_seconds' as const, at: next(), data: Math.round(m.agentSeconds) }] : []),
     { name: 'verdict', at: next(), data: m.verdict }
   ];
+}
+
+/** Keewano caps string event data at 256 characters; the full text lives in the local store. */
+const KEEWANO_MAX = 256;
+const clip = (s: string) => s.slice(0, KEEWANO_MAX);
+
+/** "source: title: text", one event per imported item or brief line. */
+export function factEvent(item: Pick<ContextItem, 'source' | 'title' | 'text'>, at: number): KEvent {
+  return { name: 'memory_fact', at, data: clip(`${item.source}: ${item.title}: ${item.text}`) };
+}
+
+/** The founder's saved memory as events: the save marker first, so recall reads everything after it. */
+export function memoryEvents(m: FounderMemory, at: number): KEvent[] {
+  let t = at;
+  const next = () => (t += 1);
+  const { profile: p, signals: s } = m;
+  return [
+    { name: 'memory_saved', at: t, data: at },
+    { name: 'profile_name', at: next(), data: clip(p.name) },
+    { name: 'profile_company', at: next(), data: clip(p.company) },
+    { name: 'profile_pitch', at: next(), data: clip(p.pitch) },
+    ...s.goals.map(g => ({ name: 'signal_goal' as const, at: next(), data: clip(g) })),
+    ...s.meet.map(g => ({ name: 'signal_meet' as const, at: next(), data: clip(g) })),
+    ...s.skip.map(g => ({ name: 'signal_skip' as const, at: next(), data: clip(g) })),
+    { name: 'signal_context', at: next(), data: clip(s.context) },
+    ...Object.entries(m.brief).filter(([, v]) => v.trim()).map(([k, v]) => factEvent({ source: 'brief', title: k, text: v }, next())),
+    ...m.items.map(i => factEvent(i, next()))
+  ];
+}
+
+/** One turn in the meeting room, first 256 characters. */
+export function turnEvent(speaker: 'you' | 'them', text: string, at: number): KEvent {
+  return { name: speaker === 'you' ? 'turn_you' : 'turn_them', at, data: clip(text) };
 }
 
 /**

@@ -2,7 +2,7 @@
 // A text from someone new starts a screening by text: the agent reads the whole thread, decides
 // meet or skip once it has heard enough, and replies. Calls are decided when their transcript lands.
 import { decide, defaultBrief } from '../../server/agent';
-import { callTurns, dial, thread, verifySignature } from '../../server/dial';
+import { callTurns, dial, ownNumbers, thread, verifySignature } from '../../server/dial';
 import { json, route } from '../../server/http';
 import { logDecision } from '../../server/keewano';
 
@@ -24,6 +24,9 @@ export const POST = route(async req => {
 
   if (event.type === 'message.received' && event.data.source !== 'internal' && event.data.messageId && event.data.from) {
     const from = event.data.from;
+    // The meeting room (server/room.ts) texts between the agent's number and the counterpart number;
+    // those must never start a screening.
+    if ((await ownNumbers(client)).has(from)) return json({ ok: true, ignored: 'own number' });
     const numberId = process.env.DIAL_NUMBER_ID ?? (await client.listNumbers())[0].id;
     const { turns } = await thread(client, numberId, from);
     const asked = turns.filter(t => t.from === 'agent').length;

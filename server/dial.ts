@@ -25,6 +25,11 @@ export async function agentNumber(client = dial()) {
   return n;
 }
 
+/** The account's own numbers (E.164). Texts between them are the meeting room talking to itself. */
+export async function ownNumbers(client: DialClient) {
+  return new Set((await client.listNumbers()).map(n => n.number));
+}
+
 /** E.164, assuming a US number when there's no country code. */
 export function toE164(raw: string) {
   const digits = raw.replace(/[^\d+]/g, '');
