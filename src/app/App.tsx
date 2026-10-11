@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, Wordmark } from '@/signal';
-import { meets, questionnaire, totals, user } from './data';
+import { questionnaire, totals } from './data';
+import { useProfile } from './profile';
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
@@ -22,6 +23,7 @@ function readStep(): Step {
 }
 
 export default function App() {
+  const { user } = useProfile();
   const [step, setStep] = useState<Step>(readStep);
 
   useEffect(() => {
@@ -69,6 +71,7 @@ export default function App() {
 }
 
 function Login({ onDone }: { onDone: () => void }) {
+  const { user } = useProfile();
   return (
     <div className="login">
       <ChromeRipple position="bottom">
@@ -88,6 +91,7 @@ function Login({ onDone }: { onDone: () => void }) {
 }
 
 function LinkedIn({ onDone }: { onDone: () => void }) {
+  const { user, setUser, resetUser } = useProfile();
   const [state, setState] = useState<'idle' | 'importing' | 'done'>('idle');
 
   const start = () => {
@@ -105,7 +109,7 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
       <div className="card form-card">
         <label className="field">
           <span className="t-label">LinkedIn profile</span>
-          <input defaultValue={user.linkedin} disabled={state !== 'idle'} />
+          <input value={user.linkedin} onChange={e => setUser({ linkedin: e.target.value })} disabled={state !== 'idle'} />
         </label>
         {state !== 'done' && (
           <button className="btn btn--ink" onClick={start} disabled={state === 'importing'}>
@@ -123,11 +127,42 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
                 <p className="t-small t-muted">{user.location}</p>
               </div>
             </div>
-            <ul className="rule-list profile__list">
-              <li><strong>{user.company}</strong>: {user.pitch}</li>
-              {user.experience.map(e => <li key={e}>{e}</li>)}
-            </ul>
-            <button className="btn btn--ink" onClick={onDone}>Looks right</button>
+            <p className="t-small t-muted">Edit anything that’s off. Your agent introduces you with exactly this.</p>
+            <div className="profile__fields">
+              <label className="field">
+                <span className="t-label">Name</span>
+                <input value={user.name} onChange={e => setUser({ name: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">Location</span>
+                <input value={user.location} onChange={e => setUser({ location: e.target.value })} />
+              </label>
+              <label className="field profile__wide">
+                <span className="t-label">Headline</span>
+                <input value={user.headline} onChange={e => setUser({ headline: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">Company</span>
+                <input value={user.company} onChange={e => setUser({ company: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">What it does</span>
+                <input value={user.pitch} onChange={e => setUser({ pitch: e.target.value })} />
+              </label>
+              <label className="field profile__wide">
+                <span className="t-label">Experience, one per line</span>
+                <textarea
+                  className="question__text"
+                  rows={4}
+                  value={user.experience.join('\n')}
+                  onChange={e => setUser({ experience: e.target.value.split('\n') })}
+                />
+              </label>
+            </div>
+            <div className="profile__actions">
+              <button className="btn btn--ink" onClick={onDone} disabled={!user.name.trim()}>Looks right</button>
+              <button className="btn btn--line" onClick={resetUser}>Reset to LinkedIn</button>
+            </div>
           </div>
         )}
       </div>
@@ -136,12 +171,13 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
 }
 
 function Questions({ onDone }: { onDone: () => void }) {
-  const [chosen, setChosen] = useState<Record<string, string[]>>(() =>
-    Object.fromEntries(questionnaire.map(q => [q.id, q.chosen]))
-  );
+  const { user, first, options, chosen, toggle, addOption, context, setContext } = useProfile();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
 
-  const toggle = (id: string, option: string) =>
-    setChosen(c => ({ ...c, [id]: c[id].includes(option) ? c[id].filter(o => o !== option) : [...c[id], option] }));
+  const add = (id: string) => {
+    addOption(id, drafts[id] ?? '');
+    setDrafts(d => ({ ...d, [id]: '' }));
+  };
 
   return (
     <section className="panel panel--wide">
@@ -157,7 +193,7 @@ function Questions({ onDone }: { onDone: () => void }) {
               <legend className="t-title">{q.question}</legend>
               {q.options.length > 0 ? (
                 <div className="chips">
-                  {q.options.map(o => (
+                  {options[q.id].map(o => (
                     <button
                       key={o}
                       type="button"
@@ -168,9 +204,18 @@ function Questions({ onDone }: { onDone: () => void }) {
                       {o}
                     </button>
                   ))}
+                  <form className="chip-add" onSubmit={e => { e.preventDefault(); add(q.id); }}>
+                    <input
+                      className="chip chip-add__input"
+                      placeholder="+ Add your own"
+                      aria-label={`Add your own answer to: ${q.question}`}
+                      value={drafts[q.id] ?? ''}
+                      onChange={e => setDrafts(d => ({ ...d, [q.id]: e.target.value }))}
+                    />
+                  </form>
                 </div>
               ) : (
-                <textarea className="question__text" defaultValue={q.text} rows={3} />
+                <textarea className="question__text" value={context} onChange={e => setContext(e.target.value)} rows={3} />
               )}
             </fieldset>
           ))}
@@ -181,7 +226,7 @@ function Questions({ onDone }: { onDone: () => void }) {
             <div className="mirror__head">
               <Avatar name={user.name} kind="you" size={44} />
               <div>
-                <p className="t-title">{user.first}’s agent</p>
+                <p className="t-title">{first}’s agent</p>
                 <p className="t-small">Mirrors what you’re looking for</p>
               </div>
             </div>
@@ -195,6 +240,12 @@ function Questions({ onDone }: { onDone: () => void }) {
                 <ul>{(items as string[]).map(i => <li key={i}>{i}</li>)}</ul>
               </div>
             ))}
+            {context.trim() && (
+              <div className="mirror__group">
+                <p className="t-label">Good to know</p>
+                <p className="t-small">{context}</p>
+              </div>
+            )}
           </div>
           <button className="btn btn--ink mirror__btn" onClick={onDone}>Build my agent</button>
         </aside>
@@ -204,6 +255,7 @@ function Questions({ onDone }: { onDone: () => void }) {
 }
 
 function ConnectCalendar({ onDone }: { onDone: () => void }) {
+  const { meets } = useProfile();
   const [connected, setConnected] = useState(false);
 
   return (
@@ -234,6 +286,7 @@ function ConnectCalendar({ onDone }: { onDone: () => void }) {
 }
 
 function Compress({ onDone }: { onDone: () => void }) {
+  const { meets } = useProfile();
   const [phase, setPhase] = useState<'packed' | 'compressing' | 'done'>('packed');
 
   useEffect(() => {

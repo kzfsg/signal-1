@@ -47,15 +47,25 @@ export interface Meet {
   trace?: TraceStep[];
 }
 
-export const user = {
-  name: 'Ari Kapoor',
-  first: 'Ari',
-  headline: 'Founder & CEO at Tracewell',
-  company: 'Tracewell',
-  pitch: 'Open-source tracing for AI agents in production',
-  linkedin: 'linkedin.com/in/arikapoor',
-  location: 'San Francisco',
-  experience: ['Staff engineer, observability at Stripe', 'Built tracing at Segment', 'CS, Waterloo']
+export interface User {
+  name: string;
+  headline: string;
+  company: string;
+  pitch: string;
+  linkedin: string;
+  location: string;
+  experience: string[];
+}
+
+// Defaults are filled from the public LinkedIn profile; the person can edit every field in the app.
+export const defaultUser: User = {
+  name: 'Kwok Zheng Feng',
+  headline: 'Founder @ Intuition · Stanford MS&E',
+  company: 'Intuition',
+  pitch: 'An IDE that turns your codebase into a living course that updates as you code',
+  linkedin: 'linkedin.com/in/kwokzhengfeng',
+  location: 'San Francisco Bay Area',
+  experience: ['SWE and AI internships at TikTok and Ant Group', '3x founder, 1x exit', 'AI researcher (LLMs)', 'Stanford MS&E, NUS Overseas Colleges']
 };
 
 export const questionnaire = [
@@ -82,7 +92,7 @@ export const questionnaire = [
     question: 'Anything your agent should know?',
     options: [],
     chosen: [],
-    text: 'Raising a $2.5M seed. 40 teams on the open-source version, 6 paying pilots. Happy to share traction, not revenue figures.'
+    text: 'Building Intuition while at Stanford. Prev TikTok and Ant Group, 3x founder with 1x exit. Happy to demo the product.'
   }
 ];
 
@@ -104,11 +114,11 @@ const featured: Meet[] = [
     checks: [{ label: 'Invests at seed', pass: true }, { label: 'Devtools or infra thesis', pass: false }, { label: 'Technical background', pass: false }],
     agentSeconds: 41,
     transcript: [
-      ['you', "Ari's raising a $2.5M seed for Tracewell, open-source tracing for AI agents. Who does Halyard back at seed?"],
+      ['you', "{first}'s raising a $2.5M seed for {company}, open-source tracing for AI agents. Who does Halyard back at seed?"],
       ['them', 'Consumer and marketplaces mostly. Our last five were a resale app, two wellness brands, a rentals marketplace and a creator tool.'],
       ['you', 'Any infrastructure or developer tools in the portfolio, or a partner who covers them?'],
       ['them', "No. Dana's open to new categories, but would want a co-investor to lead the technical diligence."],
-      ['you', "Understood. Ari's looking for a lead who can go deep on the product. I'll pass for now and keep Halyard in mind for later rounds."],
+      ['you', "Understood. {first}'s looking for a lead who can go deep on the product. I'll pass for now and keep Halyard in mind for later rounds."],
       ['them', 'Fair. Happy to reconnect when there is consumer-facing usage.']
     ],
     notes: {
@@ -116,9 +126,9 @@ const featured: Meet[] = [
       after: ['Consumer brands with strong retention', 'Marketplaces at seed'],
       overlap: ['Invests at your stage'],
       worth: ['Would need another fund to lead technical diligence', 'No devtools portfolio companies to reference'],
-      next: 'Skip for now. Revisit if Tracewell ever ships a consumer-facing product.'
+      next: 'Skip for now. Revisit if {company} ever ships a consumer-facing product.'
     },
-    shared: ['Round size and stage', 'What Tracewell does', 'Open-source adoption'],
+    shared: ['Round size and stage', 'What {company} does', 'Open-source adoption'],
     withheld: ['Revenue figures', 'Pilot customer names'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -137,11 +147,11 @@ const featured: Meet[] = [
     checks: [{ label: 'Invests at seed', pass: true }, { label: 'Devtools or infra thesis', pass: true }, { label: 'Technical background', pass: true }],
     agentSeconds: 58,
     transcript: [
-      ['you', "Ari's raising a $2.5M seed for Tracewell, open-source tracing for AI agents. What is Lattice looking at right now?"],
+      ['you', "{first}'s raising a $2.5M seed for {company}, open-source tracing for AI agents. What is Lattice looking at right now?"],
       ['them', "Agent infrastructure is our top theme this year. Marcus led seeds in two observability companies and wrote code for a decade before investing."],
       ['you', '40 teams run the open-source version, 6 are paying pilots. Most found it on their own. Does that profile fit how Lattice leads?'],
       ['them', 'Very much. Marcus leads at $1–2M and likes bottoms-up adoption. He would want to see the trace viewer and talk to two pilot users.'],
-      ['you', 'Ari can demo live and line up two pilot calls. How fast does Lattice usually move?'],
+      ['you', '{first} can demo live and line up two pilot calls. How fast does Lattice usually move?'],
       ['them', 'Partner meeting within two weeks of a first call if it clicks.'],
       ['you', 'Great. Proposing 30 minutes Thursday at 2pm, demo first.'],
       ['them', 'Confirmed on our side.']
@@ -170,15 +180,15 @@ const featured: Meet[] = [
     person: { name: 'Sofia Brandt', role: 'Founder', org: 'Bloomly', kind: 'founder' },
     week: 0, day: 2, start: 12, minutes: 45,
     verdict: 'skip',
-    reason: 'Building a consumer wellness app and looking for a technical cofounder. Kind fit for each other later, not for what Ari needs now.',
+    reason: 'Building a consumer wellness app and looking for a technical cofounder. Kind fit for each other later, not for what {first} needs now.',
     checks: [{ label: 'Can help this quarter', pass: false }, { label: 'Technical background', pass: false }, { label: 'Devtools or infra thesis', pass: false }],
     agentSeconds: 34,
     transcript: [
-      ['you', "Ari's building Tracewell and is focused on raising and finding design partners. What's Sofia hoping to get from the chat?"],
-      ['them', "Sofia's looking for a technical cofounder for Bloomly, a wellness app, and wanted Ari's take on hiring engineers."],
-      ['you', "Ari isn't looking to join or advise a new company this quarter. Could a referral help instead?"],
+      ['you', "{first}'s building {company} and is focused on raising and finding design partners. What's Sofia hoping to get from the chat?"],
+      ['them', "Sofia's looking for a technical cofounder for Bloomly, a wellness app, and wanted {first}'s take on hiring engineers."],
+      ['you', "{first} isn't looking to join or advise a new company this quarter. Could a referral help instead?"],
       ['them', 'A referral would be great, actually.'],
-      ['you', "I'll pass along two engineers from Ari's network who are exploring founding roles. Skipping the meeting so neither of you loses an hour."]
+      ['you', "I'll pass along two engineers from {first}'s network who are exploring founding roles. Skipping the meeting so neither of you loses an hour."]
     ],
     notes: {
       summary: 'Early consumer founder searching for a technical cofounder.',
@@ -187,7 +197,7 @@ const featured: Meet[] = [
       worth: ['Agent offered two referrals instead of a meeting'],
       next: 'Skip. Intro email with two referrals sent on your behalf.'
     },
-    shared: ['What Tracewell does'],
+    shared: ['What {company} does'],
     withheld: ['Round details', 'Traction'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -206,13 +216,13 @@ const featured: Meet[] = [
     checks: [{ label: 'Runs agents in production', pass: true }, { label: 'Technical background', pass: true }, { label: 'Can help this quarter', pass: true }],
     agentSeconds: 52,
     transcript: [
-      ['you', 'Tracewell traces AI agents step by step in production. Does Rampart run agents today?'],
+      ['you', '{company} traces AI agents step by step in production. Does Rampart run agents today?'],
       ['them', "Over 30 in production, handling disputes and KYC. Kenji's team spends a couple of days a week chasing failures."],
-      ['you', "That's exactly the problem Ari built Tracewell for. What do you use today?"],
+      ['you', "That's exactly the problem {first} built {company} for. What do you use today?"],
       ['them', "Logs and a homegrown dashboard. Nobody trusts it. Kenji's been looking for something open source they can self-host."],
       ['you', 'Self-hosting is supported. Would Kenji try a two-week pilot with one agent?'],
       ['them', 'Yes, if security signs off. He would want to see the data model first.'],
-      ['you', 'Ari will bring the schema. 45 minutes next Tuesday, 11am?'],
+      ['you', '{first} will bring the schema. 45 minutes next Tuesday, 11am?'],
       ['them', 'Booked.']
     ],
     notes: {
@@ -222,7 +232,7 @@ const featured: Meet[] = [
       worth: ['Security review needed before a pilot', 'Wants the data model up front'],
       next: 'Meet Tuesday 11:00am, 45 min. Bring the schema and the self-hosting guide.'
     },
-    shared: ['What Tracewell does', 'Self-hosting support'],
+    shared: ['What {company} does', 'Self-hosting support'],
     withheld: ['Round details', 'Other pilot customers'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -242,9 +252,9 @@ const featured: Meet[] = [
     checks: [{ label: 'Invests at seed', pass: true }, { label: 'Devtools or infra thesis', pass: true }, { label: 'Technical background', pass: true }],
     agentSeconds: 47,
     transcript: [
-      ['you', "Ari's raising a seed for Tracewell, tracing for AI agents. Is Lena writing checks right now?"],
+      ['you', "{first}'s raising a seed for {company}, tracing for AI agents. Is Lena writing checks right now?"],
       ['them', 'Selectively, $50–100K, only in observability and developer infrastructure.'],
-      ['you', 'Beyond the check, Ari wants advice on selling to platform teams. Is that something Lena helps with?'],
+      ['you', 'Beyond the check, {first} wants advice on selling to platform teams. Is that something Lena helps with?'],
       ['them', 'Constantly. She ran the team that sold Datadog into platform orgs and still makes intros.'],
       ['you', "Then a meeting is worth it. 30 minutes, coffee near Lena's office?"],
       ['them', 'Friday 9am at Sightglass works.']
@@ -256,7 +266,7 @@ const featured: Meet[] = [
       worth: ['Only invests in her domain, which is yours'],
       next: 'Meet Friday 9:00am at Sightglass, 30 min.'
     },
-    shared: ['Round size and stage', 'What Tracewell does'],
+    shared: ['Round size and stage', 'What {company} does'],
     withheld: ['Revenue figures'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -271,12 +281,12 @@ const featured: Meet[] = [
     person: { name: 'Tom Reyes', role: 'Technical recruiter', org: 'Northstar Talent', kind: 'recruiter' },
     week: 1, day: 0, start: 15.5, minutes: 30,
     verdict: 'skip',
-    reason: 'Recruiting pitch. Ari is not hiring until after the round closes.',
+    reason: 'Recruiting pitch. {first} is not hiring until after the round closes.',
     checks: [{ label: 'Can help this quarter', pass: false }, { label: 'Invests at seed', pass: false }, { label: 'Runs agents in production', pass: false }],
     agentSeconds: 22,
     transcript: [
-      ['them', 'Tom places senior engineers at seed-stage startups and would love to help Tracewell grow the team.'],
-      ['you', "Thanks. Ari isn't hiring until after the round. I'll keep Northstar's details for then."],
+      ['them', 'Tom places senior engineers at seed-stage startups and would love to help {company} grow the team.'],
+      ['you', "Thanks. {first} isn't hiring until after the round. I'll keep Northstar's details for then."],
       ['them', 'Understood, thanks for the quick answer.']
     ],
     notes: {
@@ -303,9 +313,9 @@ const featured: Meet[] = [
     checks: [{ label: 'Invests at seed', pass: false }, { label: 'Devtools or infra thesis', pass: true }, { label: 'Technical background', pass: true }],
     agentSeconds: 39,
     transcript: [
-      ['you', "Ari's raising a $2.5M seed for Tracewell. Does Northbeam invest at seed?"],
+      ['you', "{first}'s raising a $2.5M seed for {company}. Does Northbeam invest at seed?"],
       ['them', 'No, Series B onward. But Priya tracks devtools early and keeps relationships with seed founders.'],
-      ['you', "Then it's a relationship to keep warm, not a meeting this month. Can I add Priya to Ari's quarterly update?"],
+      ['you', "Then it's a relationship to keep warm, not a meeting this month. Can I add Priya to {first}'s quarterly update?"],
       ['them', 'Please do.']
     ],
     notes: {
@@ -315,7 +325,7 @@ const featured: Meet[] = [
       worth: ['Good future relationship. Added to your investor update list.'],
       next: 'Skip for now. Added to quarterly updates.'
     },
-    shared: ['Round size and stage', 'What Tracewell does'],
+    shared: ['Round size and stage', 'What {company} does'],
     withheld: ['Revenue figures', 'Pilot customer names'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -333,11 +343,11 @@ const featured: Meet[] = [
     checks: [{ label: 'Runs agents in production', pass: true }, { label: 'Technical background', pass: true }, { label: 'Can help this quarter', pass: true }],
     agentSeconds: 49,
     transcript: [
-      ['you', 'Tracewell traces AI agents in production. How does Calder debug agents today?'],
+      ['you', '{company} traces AI agents in production. How does Calder debug agents today?'],
       ['them', "Painfully. Ines's team supports enterprise customers who ask why an agent did something, and they can't always answer."],
-      ['you', 'Step-level traces with inputs and tool calls are exactly what Tracewell shows. Is there budget for this?'],
+      ['you', 'Step-level traces with inputs and tool calls are exactly what {company} shows. Is there budget for this?'],
       ['them', 'There is a line item for observability this quarter. Ines would want an evaluation plan.'],
-      ['you', 'Ari will bring one. 45 minutes on Wednesday the 19th?'],
+      ['you', '{first} will bring one. 45 minutes on Wednesday the 19th?'],
       ['them', 'Works.']
     ],
     notes: {
@@ -347,7 +357,7 @@ const featured: Meet[] = [
       worth: ['Enterprise security review likely'],
       next: 'Meet Wednesday 19th, 45 min. Bring an evaluation plan.'
     },
-    shared: ['What Tracewell does', 'Pilot terms'],
+    shared: ['What {company} does', 'Pilot terms'],
     withheld: ['Round details'],
     trace: [
       { t: '00:00', step: 'Handshake', detail: 'Exchanged public profiles and intents' },
@@ -506,4 +516,20 @@ export function formatTime(h: number) {
 
 export function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').slice(0, 2);
+}
+
+export function firstName(name: string) {
+  return name.trim().split(/\s+/)[0] || 'You';
+}
+
+// Swap the {first} and {company} placeholders in the demo month for the current profile.
+export function personalise(list: Meet[], user: User): Meet[] {
+  const vars = { first: firstName(user.name), company: user.company.trim() || 'your company' };
+  const fill = (v: unknown): unknown => {
+    if (typeof v === 'string') return v.replace(/\{(first|company)\}/g, (_, k: keyof typeof vars) => vars[k]);
+    if (Array.isArray(v)) return v.map(fill);
+    if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, fill(x)]));
+    return v;
+  };
+  return fill(list) as Meet[];
 }

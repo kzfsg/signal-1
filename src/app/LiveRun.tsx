@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LightLines } from '@/signal';
-import { meets, user, type Meet } from './data';
+import type { Meet } from './data';
+import { useProfile } from './profile';
 import { Avatar, VerdictBadge } from './parts';
 
 const LINE_MS = 750; // featured meets, readable
@@ -17,6 +18,7 @@ function scriptFor(m: Meet): [speaker: 'you' | 'them', text: string][] {
 }
 
 export default function LiveRun({ onDone }: { onDone: () => void }) {
+  const { user, first: you, meets } = useProfile();
   const [index, setIndex] = useState(0);
   const [lines, setLines] = useState(0);
   const [showVerdict, setShowVerdict] = useState(false);
@@ -84,7 +86,7 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
               <header className="live__room-head">
                 <div className="live__agent">
                   <Avatar name={user.name} kind="you" size={40} />
-                  <div><p className="t-title">{user.first}’s agent</p><p className="t-small">{user.company}</p></div>
+                  <div><p className="t-title">{you}’s agent</p><p className="t-small">{user.company}</p></div>
                 </div>
                 <span className="live__link" aria-hidden="true" />
                 <div className="live__agent live__agent--them">

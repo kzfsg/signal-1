@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, ChromeWord, LightLines, PrismMosaic, Wordmark } from '@/signal';
-import { meets, totals, user } from '@/app/data';
+import { totals } from '@/app/data';
+import { useProfile } from '@/app/profile';
 import { Avatar, Calendar, NotesCard, TracePanel, VerdictBadge } from '@/app/parts';
 import './landing.css';
 
@@ -23,9 +24,6 @@ const steps = [
 ];
 
 const exampleIds = ['dana', 'marcus', 'sofia', 'kenji', 'priya', 'lena'];
-const examples = exampleIds.map(id => meets.find(m => m.id === id)!);
-const featuredNote = meets.find(m => m.id === 'marcus')!;
-
 const NAV_IDLE_MS = 7000;
 
 /**
@@ -71,6 +69,9 @@ function useNavState() {
 
 export default function Landing() {
   const nav = useNavState();
+  const { user, meets } = useProfile();
+  const examples = exampleIds.map(id => meets.find(m => m.id === id)!);
+  const featuredNote = meets.find(m => m.id === 'marcus')!;
   return (
     <div className="site">
       <header className={`nav nav--glass${nav.scrolled ? ' is-scrolled' : ''}${nav.dark ? ' is-dark' : ''}${nav.hidden ? ' is-hidden' : ''}`}>
@@ -163,7 +164,7 @@ export default function Landing() {
                 <Avatar name={user.name} kind="you" size={56} />
                 <div>
                   <p className="t-title">{user.name}</p>
-                  <p className="t-small">Devtool founder raising a $2.5M seed. Looking for technical investors and teams running agents in production.</p>
+                  <p className="t-small">{user.headline}. {user.company}: {user.pitch}.</p>
                 </div>
               </div>
             </div>

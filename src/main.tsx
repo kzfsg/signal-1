@@ -4,6 +4,7 @@ import '../design-system/signal.css';
 import Landing from './site/Landing';
 import App from './app/App';
 import Catalogue from './docs/Catalogue';
+import { ProfileProvider } from './app/profile';
 
 type Route = 'landing' | 'app' | 'system';
 
@@ -35,6 +36,8 @@ function Root() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Root />
+    <ProfileProvider>
+      <Root />
+    </ProfileProvider>
   </StrictMode>
 );

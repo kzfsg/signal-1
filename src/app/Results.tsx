@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { meets, totals, dayNames, formatTime } from './data';
+import { totals, dayNames, formatTime } from './data';
+import { useProfile } from './profile';
 import { Avatar, Calendar, NotesCard, TracePanel, VerdictBadge } from './parts';
 
-const keep = meets.filter(m => m.verdict === 'meet');
-const skipped = meets.filter(m => m.verdict === 'skip');
-
 export default function Results() {
+  const { meets } = useProfile();
+  const keep = meets.filter(m => m.verdict === 'meet');
+  const skipped = meets.filter(m => m.verdict === 'skip');
   const [tab, setTab] = useState<'meet' | 'skip'>('meet');
   const list = tab === 'meet' ? keep : skipped;
   const [selected, setSelected] = useState(keep[0].id);
