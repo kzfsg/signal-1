@@ -9,7 +9,7 @@ const steps = [
   {
     n: '1',
     title: 'Your agent learns you',
-    body: 'Connect LinkedIn and answer four questions: what you’re after, who you’d love to meet, and who isn’t a fit right now.'
+    body: 'Start with LinkedIn and your goals, then bring context from your assistants and conversations to build your agent’s personal memory.'
   },
   {
     n: '2',
