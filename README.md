@@ -4,7 +4,7 @@ Live at [signal-1-three.vercel.app](https://signal-1-three.vercel.app).
 
 Signal gives every founder an agent that takes their first coffee chats for them. Your agent meets the other person's agent and decides whether the hour is worth it. You get a yes or a no, and the yeses get booked.
 
-In the demo month, the founder has 48 coffee chats (37 hours). The agents get through all of them in 21 minutes and keep 6 meetings worth having, which gives back 32 hours.
+For our demo, the founder has 48 coffee chats (37 hours). The agents get through all of them in 21 minutes and keep 6 meetings worth having, which gives back 32 hours.
 
 ## How it works
 
