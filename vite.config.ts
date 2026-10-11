@@ -1,7 +1,16 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
+
+/** api/a/b.ts for /api/a/b, else a dynamic sibling like api/a/[action].ts, as Vercel resolves them. */
+function routeFile(pathname: string) {
+  const exact = fileURLToPath(new URL(`.${pathname}.ts`, import.meta.url));
+  if (existsSync(exact)) return exact;
+  const dir = fileURLToPath(new URL(`.${pathname.slice(0, pathname.lastIndexOf('/'))}/`, import.meta.url));
+  const dynamic = existsSync(dir) ? readdirSync(dir).find(f => /^\[[^\]]+\]\.ts$/.test(f)) : undefined;
+  return dynamic ? dir + dynamic : null;
+}
 
 /**
  * Serve /api/* in dev from the same files Vercel deploys as Functions (api/**.ts exporting GET/POST
@@ -14,8 +23,8 @@ function apiRoutes(): Plugin {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url ?? '/', 'http://localhost');
         if (!url.pathname.startsWith('/api/')) return next();
-        const file = fileURLToPath(new URL(`.${url.pathname}.ts`, import.meta.url));
-        if (!existsSync(file)) return next();
+        const file = routeFile(url.pathname);
+        if (!file) return next();
         try {
           const mod = await server.ssrLoadModule(file);
           const handler = mod[req.method ?? 'GET'];

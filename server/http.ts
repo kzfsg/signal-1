@@ -63,3 +63,16 @@ export function parseInput<T>(schema: z.ZodType<T>, data: unknown): T {
   if (!r.success) throw new HttpError(400, z.prettifyError(r.error));
   return r.data;
 }
+
+type Handler = (req: Request) => Promise<Response>;
+
+/** One function serving several routes, keyed by method and the last path segment (`/api/agent/meet` → meet). */
+export function actions(table: { GET?: Record<string, Handler>; POST?: Record<string, Handler> }) {
+  const serve = (method: 'GET' | 'POST') => route(req => {
+    const name = new URL(req.url).pathname.split('/').filter(Boolean).at(-1) ?? '';
+    const handler = table[method]?.[name];
+    if (!handler) throw new HttpError(404, `No ${method} /${name}.`);
+    return handler(req);
+  });
+  return { GET: serve('GET'), POST: serve('POST') };
+}

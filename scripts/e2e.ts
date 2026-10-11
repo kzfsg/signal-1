@@ -19,7 +19,7 @@ process.env.SIGNAL_STORE = await mkdtemp(join(tmpdir(), 'signal-e2e-'));
 for (const k of ['COMPOSIO_API_KEY', 'KEEWANO_API_KEY', 'KEEWANO_PAT', 'KEEWANO_EMAIL', 'KEEWANO_PROJECT_ID', 'DIAL_API_KEY', 'DIAL_NUMBER_ID', 'DIAL_COUNTERPART_NUMBER_ID', 'VERCEL'])
   delete process.env[k];
 
-const [status, memory, chats, meet] = await Promise.all([import('../api/status'), import('../api/memory'), import('../api/agent/chats'), import('../api/agent/meet')]);
+const [status, memory, agent] = await Promise.all([import('../api/status'), import('../api/memory'), import('../api/agent/[action]')]);
 
 const call = async <T>(handler: (req: Request) => Promise<Response>, path: string, body?: unknown): Promise<T> => {
   const res = await handler(new Request(`http://signal${path}`, body ? { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } } : {}));
@@ -53,14 +53,14 @@ try {
   assert.deepEqual(recalled.memory.signals.goals, signals.goals);
   console.log(`memory: saved and recalled from ${recalled.source}`);
 
-  const listed = await call<{ source: string; chats: Chat[] }>(chats.GET, '/api/agent/chats');
+  const listed = await call<{ source: string; chats: Chat[] }>(agent.GET, '/api/agent/chats');
   assert.equal(listed.source, 'demo');
   assert.equal(listed.chats.length, 48);
   console.log(`chats: ${listed.chats.length} from ${listed.source}`);
 
   const picked = Object.keys(EXPECTED).map(id => listed.chats.find(c => c.id === id)!);
   const runId = `e2e-${Date.now()}`;
-  const meets = await Promise.all(picked.map(chat => call<Meet>(meet.POST, '/api/agent/meet', { runId, chat })));
+  const meets = await Promise.all(picked.map(chat => call<Meet>(agent.POST, '/api/agent/meet', { runId, chat })));
 
   for (const m of meets) {
     const steps = m.trace!.map(t => t.step);
