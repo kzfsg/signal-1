@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 360" style="background:#08090b" role="img" aria-labelledby="title desc">
+  <title id="title">signal</title>
+  <desc id="desc">Custom italic racing wordmark in pearlescent silver with subtle spectral edge highlights.</desc>
+  <defs>
+    <linearGradient id="pearl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".48" stop-color="#f3f3f2"/>
+      <stop offset="1" stop-color="#d5d7da"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8cf4ff"/>
+      <stop offset=".28" stop-color="#fff"/>
+      <stop offset=".56" stop-color="#ffcfb7"/>
+      <stop offset=".78" stop-color="#caacff"/>
+      <stop offset="1" stop-color="#8ceeff"/>
+    </linearGradient>
+    <filter id="soft" x="-.04" y="-.08" width="1.08" height="1.16" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <g id="letters" fill="url(#pearl)" stroke="url(#edge)" stroke-width="2.2" stroke-linejoin="round">
+      <!-- a: low, broad speedrun form, with detached upper shoulder and a narrow diagonal counter -->
+      <path d="M34 198 57 158Q62 148 75 148H201Q210 148 205 157L195 175Q191 183 181 183H151Q160 173 165 163Q168 157 163 157Q157 157 153 164L136 193Q131 202 138 202Q144 202 151 189L157 179H197L179 211Q173 222 160 222H25Q17 222 22 213Z"/>
+      <!-- l: long rising slash with the characteristic high blunt tip -->
+      <path d="M210 216 332 20Q336 14 343 14H407Q416 14 411 23L289 219Q286 224 279 224H217Q205 224 210 216Z"/>
+      <!-- g: broad bowl and pointed descender -->
+      <path d="M333 148H474Q483 148 478 157L441 217Q435 227 420 227H311Q300 227 306 216L336 166Q342 156 333 156Q326 156 320 167L295 208Q288 220 296 233L319 274Q323 281 317 289L293 328Q289 335 284 328L251 273Q245 263 251 253L309 158Q316 148 333 148ZM391 177Q395 171 390 171Q385 171 381 178L364 207Q360 214 366 214Q371 214 375 207Z"/>
+      <!-- n: narrow upright stroke and sharp shoulder, kept visually separate from g -->
+      <path d="M481 148H591Q601 148 595 158L560 214Q554 224 543 224H488Q478 224 484 214L518 159Q523 151 518 151Q512 151 507 159L467 224H407L454 148Z"/>
+      <!-- a -->
+      <path d="M608 198 631 158Q636 148 649 148H775Q784 148 779 157L769 175Q765 183 755 183H725Q734 173 739 163Q742 157 737 157Q731 157 727 164L710 193Q705 202 712 202Q718 202 725 189L731 179H771L753 211Q747 222 734 222H599Q591 222 596 213Z"/>
+      <!-- l -->
+      <path d="M784 216 906 20Q910 14 917 14H981Q990 14 985 23L863 219Q860 224 853 224H791Q779 224 784 216Z"/>
+    </g>
+  </defs>
+  <use href="#letters" fill="none" stroke="#b5f5ff" stroke-width="8" opacity=".32" filter="url(#soft)"/>
+  <use href="#letters"/>
+</svg>

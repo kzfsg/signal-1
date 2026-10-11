@@ -1,0 +1,116 @@
+/*
+ * Signal tokens — after a16z speedrun.
+ * Values marked (src) were measured from speedrun.a16z.com computed styles.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;900&family=Barlow+Condensed:wght@600&display=swap");
+
+/* Signal Speed: the brand display face, drawn after the speedrun lettering. See fonts/build_signal_speed.py. */
+@font-face {
+  font-family: "Signal Speed";
+  src: url("./fonts/SignalSpeed.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+
+:root {
+  /* Brand display face. Lowercase only: capitals map to the lowercase forms. Already slanted; never add italic. */
+  --font-speed: "Signal Speed", "Hanken Grotesk", sans-serif;
+
+  /* Text families. speedrun uses Messina Sans / Messina Sans Condensed (Luzi Type, licensed).
+     If you hold a licence, put "Messina Sans" first in each stack. */
+  --font-sans: "Hanken Grotesk", "Messina Sans", system-ui, sans-serif;
+  --font-condensed: "Barlow Condensed", "Messina Sans Condensed", "Arial Narrow", sans-serif;
+
+  /* Neutrals */
+  --paper: #ebe9e5;          /* body background (src) */
+  --sand: #e2dfd8;           /* panels, gradient base (src) */
+  --white: #ffffff;          /* cards, nav (src) */
+  --ink: #000000;            /* all type is pure black (src) */
+  --ink-64: rgb(0 0 0 / 0.64); /* secondary copy (src) */
+  --ink-10: rgb(0 0 0 / 0.1);  /* hairlines (src) */
+
+  /* Chrome: the metal the brand words are cast in */
+  --chrome-hi: #ffffff;
+  --chrome-1: #eef1f4;
+  --chrome-2: #c9cfd6;
+  --chrome-3: #8e979f;
+  --chrome-4: #4a5058;
+  --chrome-ink: #0b0d10;
+  --grad-chrome: linear-gradient(180deg, var(--chrome-hi) 0%, var(--chrome-1) 30%, var(--chrome-2) 46%, var(--chrome-3) 50%, var(--chrome-1) 56%, var(--chrome-2) 80%, var(--chrome-hi) 100%);
+  --grad-chrome-dark: linear-gradient(172deg, #7b828b 0%, #1a1d21 28%, #3b4048 48%, #050607 62%, #2a2e34 82%, #9aa1a9 100%);
+
+  /* Prism: light split through glass. Primary accent of the system. */
+  --spectrum: #ff4d6d, #ffb347, #fff275, #6dffb0, #5ee7ff, #6d8bff, #c77dff;
+  --grad-spectrum: linear-gradient(100deg, var(--spectrum));
+  /* Pastel foil for type and fills: the spectrum seen through frosted silver */
+  --grad-foil: linear-gradient(100deg, #eef1f4 0%, #ffd0dc 14%, #fff0b3 26%, #c8ffdc 38%, #b5f2ff 50%, #c3c6ff 62%, #f0cfff 74%, #eef1f4 88%);
+  /* Glass cube faces: silver with soft caustic bands */
+  --grad-prismatic:
+    linear-gradient(118deg, rgb(255 255 255 / 0) 28%, rgb(255 77 109 / 0.32) 34%, rgb(255 242 117 / 0.34) 38%, rgb(109 255 176 / 0.3) 42%, rgb(94 231 255 / 0.36) 46%, rgb(109 139 255 / 0.32) 50%, rgb(199 125 255 / 0.28) 54%, rgb(255 255 255 / 0) 60%),
+    linear-gradient(32deg, rgb(255 255 255 / 0) 56%, rgb(94 231 255 / 0.28) 62%, rgb(199 125 255 / 0.26) 66%, rgb(255 179 71 / 0.24) 70%, rgb(255 255 255 / 0) 76%),
+    radial-gradient(60% 50% at 30% 25%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0) 70%),
+    linear-gradient(160deg, #f6f7f9 0%, #dfe3e8 45%, #c4cad1 70%, #eef1f4 100%);
+  /* The SR badge gradient: grey-white into cyan, periwinkle and lavender */
+  --grad-sr:
+    radial-gradient(70% 90% at 45% 115%, #6ff3ee 0%, rgb(111 243 238 / 0) 70%),
+    linear-gradient(100deg, #e4e4e2 0%, #c4e6ee 22%, #7fd6f6 45%, #8fa4fa 66%, #9a96f6 80%, #bb9aee 100%);
+  /* Halftone dot screen laid over SR and foil surfaces */
+  --halftone: radial-gradient(circle, rgb(255 255 255 / 0.4) 0.9px, transparent 1.3px) 0 0 / 5px 5px;
+
+  /* Chroma (src) */
+  --cyan: #56faf7;
+  --azure: #00a1ff;
+  --blue: #398cff;
+  --indigo: #757aff;
+  --violet: #a162ff;
+  --peach: #f8dcbb;
+
+  /* Gradients */
+  --grad-band: linear-gradient(90deg, #00c6c6 -20%, var(--azure) 0%, var(--blue) 22%, var(--indigo) 42%, #906dff 62%, var(--violet) 100%);
+  --grad-chroma: linear-gradient(100deg, var(--azure) 0%, var(--blue) 28%, var(--indigo) 52%, var(--violet) 78%, #c77dff 100%);
+  --grad-aurora: linear-gradient(100deg, var(--cyan) 0%, var(--azure) 30%, var(--violet) 65%, var(--peach) 100%);
+  --grad-holo: linear-gradient(100deg, #9ff2ef 0%, #d3eef0 30%, #e9e4ef 50%, #d6c8ff 75%, #b7a2ff 100%);
+  /* Glows sit at the edges so the centre stays calm enough for a chroma word. */
+  --grad-aura:
+    radial-gradient(60% 45% at 50% -10%, var(--cyan) 0%, rgb(86 250 247 / 0) 70%),
+    radial-gradient(35% 60% at 104% 60%, var(--violet) 0%, rgb(161 98 255 / 0) 70%),
+    radial-gradient(30% 40% at -4% 30%, var(--blue) 0%, rgb(57 140 255 / 0) 70%),
+    radial-gradient(60% 45% at 30% 110%, var(--peach) 0%, rgb(248 220 187 / 0) 70%),
+    var(--sand);
+  /* Hard-edged prism used behind speedrun's feature cards (src, verbatim) */
+  --grad-prism:
+    radial-gradient(68.8% 62.3% at 0% 64.6%, var(--sand) 0%, var(--sand) 50%, rgb(226 223 216 / 0) 51%),
+    radial-gradient(190.7% 100.9% at 35.4% 1%, var(--cyan) 0%, var(--cyan) 49%, rgb(86 250 247 / 0) 50%),
+    radial-gradient(209.9% 144.5% at 35.4% 0%, var(--violet) 49%, rgb(145 76 255 / 0) 49.83%),
+    radial-gradient(260.2% 183.9% at 35.4% 0%, var(--peach) 0%, var(--peach) 49%, rgb(226 223 216 / 0) 50%);
+
+  /* Type scale. Display sizes run line-height 1 and -5% tracking (src). */
+  --fs-mega: clamp(5rem, 17vw, 15.2rem);   /* 243px "DEMO DAY" */
+  --fs-display: clamp(3rem, 5vw, 4.5rem);  /* 72px h1 */
+  --fs-quote: clamp(2.5rem, 4.4vw, 4rem);  /* 64px pull quotes */
+  --fs-headline: clamp(2rem, 3.4vw, 3rem); /* 48px section heads */
+  --fs-title: 1.5rem;
+  --fs-body: 1.125rem;
+  --fs-small: 0.8125rem;                   /* 13px card copy (src) */
+  --fs-label: 1rem;
+  --fs-nav: 1.125rem;
+
+  --track-mega: -0.074em;  /* -18px at 243px (src) */
+  --track-display: -0.05em;
+  --track-body: -0.01em;
+  --track-label: 0.04em;   /* condensed eyebrow, 0.64px at 16px (src) */
+
+  /* Space & shape */
+  --gutter: clamp(1.25rem, 6.67vw, 6rem); /* 96px at 1440 (src) */
+  --max: 78rem;
+  --stack-sm: 1rem;
+  --stack-md: 2rem;
+  --stack-lg: 4rem;
+  --stack-xl: clamp(5rem, 10vw, 9rem);
+  --radius-sm: 8px;   /* buttons, prism panels (src) */
+  --radius-md: 12px;  /* nav items (src) */
+  --radius-lg: 16px;  /* cards (src) */
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
