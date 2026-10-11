@@ -8,3 +8,4 @@ dist/
 .playwright-mcp/
 *.tsbuildinfo
 !.env.example
+.signal/

@@ -10,10 +10,14 @@
     "typecheck": "tsc -b && tsc -p tsconfig.server.json",
     "dial:setup": "tsx --env-file=.env.local scripts/dial-setup.ts",
     "keewano:setup": "tsx --env-file=.env.local scripts/keewano-setup.ts",
-    "test": "tsx --test server/*.test.ts"
+    "test": "tsx --test server/*.test.ts",
+    "calendar:seed": "tsx --env-file=.env.local scripts/calendar-seed.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "dependencies": {
+    "@ai-sdk/fireworks": "^3.0.70",
     "@ai-sdk/mcp": "^2.0.73",
+    "@composio/core": "^0.22.0",
     "@getdial/sdk": "^0.41.1",
     "ai": "^7.0.137",
     "motion": "^12.43.0",
