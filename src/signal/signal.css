@@ -1,0 +1,41 @@
+/* Overrides that pull React Bits components onto Signal type and surfaces. */
+
+.signal-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.signal-echo {
+  font-family: var(--font-sans);
+  letter-spacing: var(--track-mega);
+}
+
+/* ScrollVelocity ships font-family: sans-serif and a drop shadow. */
+.signal-marquee .scroller {
+  font-family: var(--font-sans);
+  font-size: var(--fs-mega);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: var(--track-mega);
+  filter: none;
+}
+
+.signal-marquee .scroller span { padding-inline-end: 0.25em; }
+
+.signal-glare {
+  display: inline-block;
+}
+
+.signal-stat .t-display { font-variant-numeric: tabular-nums; }
+
+.signal-marquee .parallax:nth-child(even) .scroller span {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink);
+}
+
+.signal-logos ul { list-style: none; margin: 0; padding: 0; }
+
+.signal-metal { width: 100%; }
+
+.signal-fill-ink { position: relative; width: 100%; height: 100%; background: #0b0d10; }

@@ -1,0 +1,48 @@
+.prism-cube {
+  --half: calc(var(--cube) / 2);
+  width: var(--cube);
+  height: var(--cube);
+  perspective: calc(var(--cube) * 4);
+}
+
+.prism-cube__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(-24deg) rotateY(-38deg);
+}
+
+.prism-cube__body--spin { animation: prism-cube-spin 18s ease-in-out infinite alternate; }
+
+@keyframes prism-cube-spin {
+  from { transform: rotateX(-24deg) rotateY(-52deg); }
+  to   { transform: rotateX(-18deg) rotateY(-22deg); }
+}
+
+.prism-cube__face {
+  position: absolute;
+  inset: 0;
+  background: var(--grad-prismatic);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  box-shadow: inset 0 0 calc(var(--cube) * 0.12) rgb(255 255 255 / 0.7);
+  opacity: 0.88;
+  backface-visibility: visible;
+}
+
+/* Rotate the caustic bands per face so the light reads as passing through, not printed on */
+.prism-cube__face--front  { transform: translateZ(var(--half)); }
+.prism-cube__face--back   { transform: rotateY(180deg) translateZ(var(--half)); background-position: 40% 0; }
+.prism-cube__face--right  { transform: rotateY(90deg) translateZ(var(--half)); filter: hue-rotate(40deg) brightness(0.96); }
+.prism-cube__face--left   { transform: rotateY(-90deg) translateZ(var(--half)); filter: hue-rotate(-30deg); }
+.prism-cube__face--top    { transform: rotateX(90deg) translateZ(var(--half)); filter: brightness(1.06) hue-rotate(80deg); }
+.prism-cube__face--bottom { transform: rotateX(-90deg) translateZ(var(--half)); filter: brightness(0.9); }
+
+.prism-cube__mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--cube) * 0.34);
+  transform: translateZ(2px);
+}
