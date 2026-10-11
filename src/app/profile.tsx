@@ -2,13 +2,13 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { defaultUser, firstName, meets as demoMeets, personalise, questionnaire, type Meet, type User } from './data';
 
 // Everything the person can customise. Saved in localStorage so edits survive a reload.
-export type AgentProvider = 'claude' | 'chatgpt' | 'custom';
+export type AgentProvider = 'claude' | 'chatgpt' | 'muse' | 'instinct' | 'custom';
 export interface PersonalAgent {
   provider: AgentProvider;
   endpoint?: string;
 }
 
-export const agentLabel: Record<AgentProvider, string> = { claude: 'Claude', chatgpt: 'ChatGPT', custom: 'Custom agent' };
+export const agentLabel: Record<AgentProvider, string> = { claude: 'Claude', chatgpt: 'ChatGPT', muse: 'Muse', instinct: 'Instinct', custom: 'Custom agent' };
 
 // How the agent reads mid-sentence: "runs on your Claude", "via your own agent".
 export const agentName = (a: PersonalAgent) => (a.provider === 'custom' ? 'own agent' : agentLabel[a.provider]);
