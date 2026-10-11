@@ -1,21 +1,49 @@
-# Signal
+<p align="center">
+  <img src="docs/assets/cover.png" alt="Signal: a month of coffee chats, in thirty minutes." width="100%">
+</p>
 
-Live at [signal-1-three.vercel.app](https://signal-1-three.vercel.app).
+<p align="center">
+  <a href="https://signal-1-three.vercel.app"><img src="https://img.shields.io/badge/Try_the_live_demo-%E2%86%92-111111?style=for-the-badge" alt="Try the live demo"></a>
+  &nbsp;
+  <a href="docs/architecture/README.md"><img src="https://img.shields.io/badge/Read_the_architecture-%E2%86%92-555555?style=for-the-badge" alt="Read the architecture"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React 19">
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/three.js-000000?style=flat-square&logo=threedotjs&logoColor=white" alt="three.js">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel">
+</p>
+
+---
 
 Signal gives every founder an agent that takes their first coffee chats for them. Your agent meets the other person's agent and decides whether the hour is worth it. You get a yes or a no, and the yeses get booked.
 
-For our demo, the founder has 48 coffee chats (37 hours). The agents get through all of them in 21 minutes and keep 6 meetings worth having, which gives back 32 hours.
+<table align="center">
+  <tr>
+    <td align="center"><h3>48</h3>coffee chats on the calendar</td>
+    <td align="center"><h3>21 min</h3>for the agents to take them all</td>
+    <td align="center"><h3>6</h3>meetings worth having</td>
+    <td align="center"><h3>32 h</h3>given back to the founder</td>
+  </tr>
+</table>
+
+<p align="center"><sub>From our demo month: 37 hours of coffee chats, handled in 21 minutes.</sub></p>
 
 ## How it works
 
-1. **Connect your world.** Connect LinkedIn, Gmail and Google Calendar through Composio.
-2. **Define a good signal.** Answer four questions: what you're after, who you want to meet, who isn't a fit, and what your agent may share.
-3. **Save it to memory.** Your profile, your answers and your connected context go into KeewanoDB, which is both the database and the agent's memory.
-4. **Hand it to your agent.** For each chat on your calendar, your agent recalls your context and meets the other person's agent. The agents exchange intros, then your agent asks up to three questions. With Dial, every turn travels as a real message between two numbers. Every turn is logged.
-5. **Get a yes or a no.** Jev reads the logged conversation against your criteria and decides meet or skip.
-6. **Book the meets.** The agents agree on a time, and the meeting goes on your Google Calendar.
+| | Step | What happens |
+| :-: | --- | --- |
+| 1 | **Connect your world** | Connect LinkedIn, Gmail and Google Calendar through Composio. |
+| 2 | **Define a good signal** | Answer four questions: what you're after, who you want to meet, who isn't a fit, and what your agent may share. |
+| 3 | **Save it to memory** | Your profile, your answers and your connected context go into KeewanoDB, which is both the database and the agent's memory. |
+| 4 | **Hand it to your agent** | For each chat on your calendar, your agent recalls your context and meets the other person's agent. The agents exchange intros, then your agent asks up to three questions. With Dial, every turn travels as a real message between two numbers. Every turn is logged. |
+| 5 | **Get a yes or a no** | Jev reads the logged conversation against your criteria and decides meet or skip. |
+| 6 | **Book the meets** | The agents agree on a time, and the meeting goes on your Google Calendar. |
 
-See [docs/architecture](docs/architecture/README.md) for the full design.
+> [!TIP]
+> See the [architecture doc](docs/architecture/README.md) for the full design.
 
 ## Tech stack
 
@@ -46,7 +74,8 @@ Every service is optional. Each one turns on when its keys are in `.env.local`. 
 | KeewanoDB | `KEEWANO_API_KEY`, `KEEWANO_PAT`, `KEEWANO_EMAIL`, `KEEWANO_PROJECT_ID` | Memory and turns stay in the local store (`.signal/`) |
 | Dial | `DIAL_API_KEY`, `DIAL_NUMBER_ID`, `DIAL_COUNTERPART_NUMBER_ID` | The agents talk in-process |
 
-Fireworks no longer offers Muse Glimmer 30B as a serverless model. Deploy it on demand, then set `FIREWORKS_MODEL` to your deployment's model id.
+> [!NOTE]
+> Fireworks no longer offers Muse Glimmer 30B as a serverless model. Deploy it on demand, then set `FIREWORKS_MODEL` to your deployment's model id.
 
 ## Scripts
 
@@ -68,3 +97,9 @@ Fireworks no longer offers Muse Glimmer 30B as a serverless model. Deploy it on 
 | `server/` | The pipeline: memory, meeting room, decision, booking, and the clients for each service |
 | `api/` | The HTTP routes, deployed as Vercel Functions |
 | `scripts/` | Setup scripts, the e2e test, and the fake model endpoint |
+
+---
+
+<p align="center">
+  <a href="https://signal-1-three.vercel.app"><b>signal-1-three.vercel.app</b></a>
+</p>
