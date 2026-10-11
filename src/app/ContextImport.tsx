@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sources, type SampleSession } from './memoryData';
+import { sourceActivity } from './sourceActivity';
 
 function buildStreams(items: SampleSession[]) {
   return sources.filter(source => items.some(item => item.source === source.id)).map(source => {
@@ -26,7 +27,7 @@ function ConnectorStream({ stream, elapsed }: { stream: Stream; elapsed: number 
   const processed = conversations.filter(c => elapsed >= c.end).length;
   const complete = elapsed >= duration;
   const current = conversations.find(c => elapsed < c.end);
-  const status = complete ? 'Import complete' : current && elapsed < current.read ? 'Reading conversation' : current && elapsed < current.classify ? 'Classifying context' : 'Extracting findings';
+  const status = complete ? 'Import complete' : current && elapsed < current.read ? sourceActivity[source.id].reading : current && elapsed < current.classify ? 'Classifying context' : 'Extracting findings';
   const renderConversations = () => conversations.map(({ item, start, read, classify, end }) => {
         const pending = elapsed < start;
         const done = elapsed >= end;
@@ -40,12 +41,14 @@ function ConnectorStream({ stream, elapsed }: { stream: Stream; elapsed: number 
         </article>;
       });
   return <section className={`import-stream${complete ? ' is-complete' : ''}`} aria-label={`${source.name} import`}>
-    <button className="import-stream-toggle" aria-expanded={expanded} aria-controls={`stream-${source.id}`} onClick={() => setExpanded(value => !value)}>
-      <span className="memory-source-mark" data-brand={source.id}><img src={source.logo} alt="" /></span>
-      <span className="import-stream-name"><strong>{source.name}</strong><span>{processed} / {conversations.length} reviewed</span></span>
+    <div className="import-stream-toggle">
+      <button className="import-stream-open" aria-label={`View ${source.name} context`} aria-haspopup="dialog" onClick={() => historyDialog.current?.showModal()}>
+        <span className="memory-source-mark" data-brand={source.id}><img src={source.logo} alt="" /></span>
+        <span className="import-stream-name"><strong>{source.name}</strong><span>{processed} / {conversations.length} {sourceActivity[source.id].unit} reviewed</span></span>
+      </button>
       <span className={complete ? 'import-done' : 'import-spinner'} aria-hidden="true">{complete ? '✓' : ''}</span>
-      <span className={`import-chevron${expanded ? ' is-open' : ''}`} aria-hidden="true">⌄</span>
-    </button>
+      <button className="import-stream-collapse" aria-label={`${expanded ? 'Collapse' : 'Expand'} ${source.name} preview`} aria-expanded={expanded} aria-controls={`stream-${source.id}`} onClick={() => setExpanded(value => !value)}><span className={`import-chevron${expanded ? ' is-open' : ''}`} aria-hidden="true">⌄</span></button>
+    </div>
     <div className="import-stream-status"><span>{status}</span><span>{Math.min(100, Math.round(elapsed / duration * 100))}%</span></div>
     <progress value={Math.min(elapsed, duration)} max={duration} aria-label={`${source.name} progress`} />
     {!expanded && <p className="import-collapsed-preview">{current?.item.title ?? `${conversations.filter(c => c.item.classification === 'Relevant').length} relevant items ready`}</p>}
@@ -55,7 +58,7 @@ function ConnectorStream({ stream, elapsed }: { stream: Stream; elapsed: number 
     </div>
     <dialog ref={historyDialog} className="connector-dialog import-history-dialog" aria-labelledby={`history-title-${source.id}`}>
       <div className="connector-dialog-header"><span className="memory-source-mark" data-brand={source.id}><img src={source.logo} alt="" /></span><h2 id={`history-title-${source.id}`}>{source.name} history</h2><button className="connector-close" aria-label="Close history" onClick={() => historyDialog.current?.close()}>×</button></div>
-      <p className="import-history-caption">{conversations.length} conversations in your selected sample history · {processed} reviewed</p>
+      <p className="import-history-caption">{conversations.length} {sourceActivity[source.id].unit} in your selected sample history · {processed} reviewed</p>
       <div className="import-history-list">{renderConversations()}</div>
     </dialog>
   </section>;

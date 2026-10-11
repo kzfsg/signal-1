@@ -22,6 +22,7 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
   const [index, setIndex] = useState(0);
   const [lines, setLines] = useState(0);
   const [showVerdict, setShowVerdict] = useState(false);
+  const [viewing, setViewing] = useState<number | null>(null); // a finished chat opened while the run continues
   const queueRef = useRef<HTMLOListElement>(null);
   const roomRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +30,13 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
   const current = meets[Math.min(index, meets.length - 1)];
   const script = scriptFor(current);
   const fast = !current.transcript;
+
+  // The room shows either the live chat or a finished one replayed in full
+  const replay = viewing === null ? null : meets[viewing];
+  const shown = replay ?? current;
+  const shownScript = replay ? scriptFor(replay) : script;
+  const shownLines = replay ? shownScript.length : lines;
+  const shownVerdict = replay ? true : showVerdict;
 
   useEffect(() => {
     if (finished) return;
@@ -48,19 +56,22 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
   }, [lines, showVerdict, finished, script.length, fast]);
 
   // Keep the current row and newest line in view without moving the page
+  // Leave both alone while a replay is open, so the list doesn't jump under the cursor
   useEffect(() => {
+    if (viewing !== null) return;
     const row = queueRef.current?.children[index] as HTMLElement | undefined;
     if (row && queueRef.current) queueRef.current.scrollTop = row.offsetTop - queueRef.current.clientHeight / 2;
-  }, [index]);
+  }, [index, viewing]);
   useEffect(() => {
-    if (roomRef.current) roomRef.current.scrollTop = roomRef.current.scrollHeight;
-  }, [lines, showVerdict]);
+    if (!roomRef.current) return;
+    roomRef.current.scrollTop = viewing === null ? roomRef.current.scrollHeight : 0;
+  }, [lines, showVerdict, viewing]);
 
   const done = meets.slice(0, finished ? meets.length : index);
   const kept = done.filter(m => m.verdict === 'meet');
   const agentSeconds = done.reduce((s, m) => s + m.agentSeconds, 0);
   const hoursFreed = Math.round(done.filter(m => m.verdict === 'skip').reduce((s, m) => s + m.minutes, 0) / 60);
-  const first = current.person.name.split(' ')[0];
+  const first = shown.person.name.split(' ')[0];
 
   return (
     <section className="live surface-ink">
@@ -69,20 +80,46 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
       <div className="live__grid">
         <aside className="live__queue">
           <p className="t-label live__label">{meets.length} chats this month</p>
+          {done.length > 0 && <p className="t-small live__hint">Click a finished chat to read it</p>}
           <ol ref={queueRef}>
-            {meets.map((m, i) => (
-              <li key={m.id} className={i < index || finished ? 'is-done' : i === index ? 'is-now' : ''}>
-                <Avatar name={m.person.name} kind={m.person.kind} size={28} />
-                <span className="live__qname">{m.person.name}</span>
-                {i < index || finished ? <VerdictBadge verdict={m.verdict} /> : i === index ? <span className="live__pulse">Meeting</span> : null}
-              </li>
-            ))}
+            {meets.map((m, i) => {
+              const isDone = i < index || finished;
+              const isNow = !isDone && i === index;
+              const row = (
+                <>
+                  <Avatar name={m.person.name} kind={m.person.kind} size={28} />
+                  <span className="live__qname">{m.person.name}</span>
+                  {isDone ? <VerdictBadge verdict={m.verdict} /> : isNow ? <span className="live__pulse">Meeting</span> : null}
+                </>
+              );
+              const state = [isDone && 'is-done', isNow && 'is-now', viewing === i && 'is-viewing'].filter(Boolean).join(' ');
+              return (
+                <li key={m.id} className={state}>
+                  {isDone ? (
+                    <button className="live__row" onClick={() => setViewing(viewing === i ? null : i)} aria-pressed={viewing === i}>{row}</button>
+                  ) : isNow && viewing !== null ? (
+                    <button className="live__row" onClick={() => setViewing(null)}>{row}</button>
+                  ) : (
+                    <div className="live__row">{row}</div>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </aside>
 
-        <div className="live__room" aria-live="polite">
-          {!finished ? (
+        <div className={replay ? 'live__room live__room--replay' : 'live__room'} aria-live={replay ? 'off' : 'polite'}>
+          {replay || !finished ? (
             <>
+              {replay && (
+                <div className="live__replay">
+                  <p className="t-small">
+                    Replaying {first}’s chat
+                    {!finished && <span className="live__replay-live"> · live: {current.person.name.split(' ')[0]}</span>}
+                  </p>
+                  <button className="btn btn--line live__back" onClick={() => setViewing(null)}>{finished ? 'Back to summary' : 'Back to live'}</button>
+                </div>
+              )}
               <header className="live__room-head">
                 <div className="live__agent">
                   <Avatar name={user.name} kind="you" size={40} />
@@ -90,20 +127,20 @@ export default function LiveRun({ onDone }: { onDone: () => void }) {
                 </div>
                 <span className="live__link" aria-hidden="true" />
                 <div className="live__agent live__agent--them">
-                  <div><p className="t-title">{first}’s agent</p><p className="t-small">{current.person.role}, {current.person.org}</p></div>
-                  <Avatar name={current.person.name} kind={current.person.kind} size={40} />
+                  <div><p className="t-title">{first}’s agent</p><p className="t-small">{shown.person.role}, {shown.person.org}</p></div>
+                  <Avatar name={shown.person.name} kind={shown.person.kind} size={40} />
                 </div>
               </header>
 
               <div className="live__transcript" ref={roomRef}>
-                {script.slice(0, lines).map(([who, text], i) => (
+                {shownScript.slice(0, shownLines).map(([who, text], i) => (
                   <p key={i} className={`bubble bubble--${who}`}>{text}</p>
                 ))}
-                {lines < script.length && <p className="bubble bubble--typing" aria-label="Agent is typing"><span /><span /><span /></p>}
-                {showVerdict && (
-                  <div className={`live__verdict live__verdict--${current.verdict}`}>
-                    <VerdictBadge verdict={current.verdict} />
-                    <p>{current.reason}</p>
+                {shownLines < shownScript.length && <p className="bubble bubble--typing" aria-label="Agent is typing"><span /><span /><span /></p>}
+                {shownVerdict && (
+                  <div className={`live__verdict live__verdict--${shown.verdict}`}>
+                    <VerdictBadge verdict={shown.verdict} />
+                    <p>{shown.reason}</p>
                   </div>
                 )}
               </div>

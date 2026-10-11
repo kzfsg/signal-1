@@ -259,3 +259,7 @@
 .memory-flow--document .memory-topline { order: 2; }
 .memory-flow--document .memory-demo { display: none; }
 .app.app--memory .app__main { padding-top: 1.5rem; }
+.import-stream-open { display: flex; align-items: center; gap: .65rem; flex: 1; min-width: 0; border: 0; padding: 0; background: transparent; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.import-stream-open:hover strong { text-decoration: underline; text-underline-offset: .2em; }
+.import-stream-collapse { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
+.import-stream-collapse:hover { background: var(--paper); }

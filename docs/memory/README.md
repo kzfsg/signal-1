@@ -277,3 +277,13 @@ Verified: production build; Markdown includes the expanded profile; connector se
 ### Source alignment at generation time
 
 Generated memory now persists a snapshot of the exact profile fields, selected source excerpts and onboarding notes used to create it. Preview and Markdown share one brief; the source references are supporting metadata in Preview, not embedded in exported Markdown. Later profile changes cannot silently relabel an old memory's evidence. Section edits retain original evidence and show “Edited by you.” Older drafts without snapshots preserve their content and ask users to regenerate before showing source references. Browser verification covered Markdown round-trip, exact company/profile and funding/source alignment, edited-field attribution, reload persistence and subsequent profile changes.
+
+### Source-to-memory audit before merge
+
+All 25 sources now have different reading labels (`src/app/sourceActivity.ts`), distinct sample excerpts and at least one relevant sample. Other examples remain unrelated or uncertain where appropriate. Muse represents personal reflections about energy, intentional relationships and time to build; email represents follow-ups, calendar entries express scheduling preferences, Granola captures meeting reflections, and work agents contribute business context from task sessions.
+
+Clicking any source name in the parallel import opens its own context dialog, including sources with only one or two items. The adjacent arrow separately collapses the preview. The overflow-only View full history control remains unchanged. Dialogs and previews use the same session objects and extracted findings as the review screen.
+
+`assembleMemory` merges the confirmed profile and selected findings into their matching fields, preserving each finding verbatim and removing exact duplicates. Imported company findings are retained alongside the profile and receive their own citations. Snapshots preserve the exact evidence at generation time; later user edits retain original attribution with an edit label. Unrelated and Needs review sessions remain excluded by default. Exported Markdown shares the brief content; source metadata is inspected in Preview.
+
+Browser audit opened all 25 source dialogs and checked their own conversations/findings. Every source had a unique excerpt and reading label, and its findings survived a Markdown round-trip. A full import at 90 days selected 25 relevant items, stored 25 evidence snapshots, preserved every selected fact in memory and excluded unrelated/uncertain items. Muse's specific personal motivations appeared unchanged in the resulting Goals and Preferences sections.

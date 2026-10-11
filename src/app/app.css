@@ -215,24 +215,36 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
 }
 
-.live__queue { display: grid; grid-template-rows: auto 1fr; padding: 1.1rem 0.75rem 0.75rem; min-height: 0; }
+.live__queue { display: grid; grid-template-rows: auto auto 1fr; padding: 1.1rem 0.75rem 0.75rem; min-height: 0; }
 .live__queue .live__label { padding: 0 0.5rem 0.75rem; }
 
 .live__queue ol { list-style: none; margin: 0; padding: 0; overflow-y: auto; position: relative; }
 
-.live__queue li {
+.live__queue li { border-radius: var(--radius-sm); font-size: 0.9rem; opacity: 0.45; }
+
+.live__row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
   padding: 0.4rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  opacity: 0.45;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
+
+button.live__row { cursor: pointer; }
+button.live__row:hover { background: rgb(255 255 255 / 0.06); }
+button.live__row:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
 
 .live__queue li.is-done,
 .live__queue li.is-now { opacity: 1; }
 .live__queue li.is-now { background: rgb(255 255 255 / 0.1); }
+.live__queue li.is-viewing { background: rgb(255 255 255 / 0.14); box-shadow: inset 2px 0 0 var(--cyan); }
+.live__hint { padding: 0 0.5rem 0.6rem; margin: 0; color: rgb(255 255 255 / 0.5); }
 .live__qname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .live__queue .verdict { height: 1.4rem; font-size: 0.78rem; padding: 0 0.45rem; }
 
@@ -249,6 +261,21 @@
 @keyframes live-pulse { 50% { opacity: 0.35; } }
 
 .live__room { display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+.live__room--replay { grid-template-rows: auto auto 1fr; }
+
+.live__replay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem;
+  background: rgb(255 255 255 / 0.06);
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.live__replay p { margin: 0; font-weight: 600; }
+.live__replay-live { color: var(--cyan); }
+.live__back { color: var(--white); }
 
 .live__room-head {
   display: flex;

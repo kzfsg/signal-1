@@ -96,10 +96,24 @@ export const sessions: SampleSession[] = [
   { id: 'granola-old', source: 'granola', title: 'Early fundraising brainstorm', daysAgo: 45, classification: 'Needs review', reason: 'An older exploratory discussion, not the current funding plan.', excerpt: 'Maybe we bootstrap, or raise a small angel round. We haven’t decided.', facts: {} },
   { id: 'files-brief', source: 'files', title: 'Tracewell · company brief', daysAgo: 7, classification: 'Relevant', reason: 'A dated company brief with a current product and fundraising goal.', excerpt: 'Open-source tracing for production AI agents. Raising a $2.5M seed to grow the product and recruit design partners.', facts: { company: 'Tracewell builds open-source tracing for AI agents in production.', funding: 'Raising a $2.5M seed.', goals: 'Grow the product and recruit design partners.' } }
 ];
+sessions.push({"id": "pi-practice", "source": "pi", "title": "CLI work session · preparing the demo checklist", "daysAgo": 3, "classification": "Relevant", "reason": "An explicit demo-planning instruction carries business context, while coding tasks remain excluded.", "excerpt": "Ari: Before editing the demo, write a checklist for a five-minute investor walkthrough: one user problem, one product workflow and one ask for design-partner feedback. Avoid a tour of the code.", "facts": {"goals": "Prepare a five-minute investor walkthrough with one user problem, one product workflow and one design-partner ask."}});
+sessions.push({"id": "perplexity-criteria", "source": "perplexity", "title": "Research follow-up · verify thesis before outreach", "daysAgo": 1, "classification": "Relevant", "reason": "The founder states a research preference, without endorsing any suggested fund.", "excerpt": "Ari: For any fund we research, verify its current thesis on its own website and look at recent developer-tools investments. Mark uncertain information clearly. I will decide whom to contact after reviewing the evidence.", "facts": {"preferences": "Verify fund thesis and recent developer-tools investments against primary sources before choosing outreach targets."}});
+sessions.push({"id": "telegram-intro", "source": "telegram", "title": "Founder group · permission for a warm introduction", "daysAgo": 1, "classification": "Relevant", "reason": "The founder gives explicit conditions for an introduction; group suggestions remain unconfirmed.", "excerpt": "Ari: If you know a technical seed investor, ask whether they want an intro before sharing my contact details. Please include why you think the product is relevant to their thesis.", "facts": {"boundaries": "Ask before sharing contact details in founder groups; include the specific thesis fit in warm introductions."}});
+sessions.push({"id": "discord-feedback", "source": "discord", "title": "Developer community · invite design-partner feedback", "daysAgo": 3, "classification": "Relevant", "reason": "The founder states a specific product-feedback goal in a developer community.", "excerpt": "Ari: I would like feedback from engineering teams trying the product on an unfamiliar repository. Invite people willing to describe where they get stuck. Community enthusiasm alone is not evidence that they are customers.", "facts": {"goals": "Recruit engineering teams willing to try the product on an unfamiliar repository and describe where they get stuck."}});
+sessions.push({"id": "calendar-preferences", "source": "google-calendar", "title": "Calendar note · meeting buffers and demo preparation", "daysAgo": 1, "classification": "Relevant", "reason": "A personal scheduling note expresses preferences; invitations do not imply investment interest.", "excerpt": "My scheduling note: Leave 15 minutes between investor calls for notes. Add a clear agenda and a demo-preparation block before technical diligence. An invite is only a scheduled conversation, not an investor commitment.", "facts": {"preferences": "Leave 15-minute buffers between investor calls and reserve demo-preparation time before technical diligence."}});
+
 export type Brief = Record<MemoryField, string>;
 export function createBrief(included: string[], evidence: SampleSession[] = sessions): Brief {
   return Object.fromEntries(memoryFields.map(({ id }) => [id, [...new Set(evidence.filter(s => included.includes(s.id)).map(s => s.facts[id]).filter(Boolean))].join('\n')])) as Brief;
 }
+// Every selected finding is preserved in its field, with exact duplicates removed.
+export function assembleMemory(profile: Brief, evidence: SampleSession[]): Brief {
+  return Object.fromEntries(memoryFields.map(({ id }) => {
+    const findings = [...new Set(evidence.map(item => item.facts[id]).filter((value): value is string => Boolean(value)))];
+    return [id, [profile[id], ...findings.filter(value => !profile[id].includes(value))].filter(Boolean).join('\n')];
+  })) as Brief;
+}
+
 export interface MemoryDraft { sources: SourceId[]; range: number; included: string[]; brief: Brief; provenance?: { profile: Brief; sessions: SampleSession[]; notes: string }; editedAt?: Partial<Record<MemoryField, string>>; generated: boolean; saved: boolean }
 export const emptyDraft = (): MemoryDraft => ({ sources: [], range: 30, included: [], brief: createBrief([]), generated: false, saved: false });
 export const storageKey = 'signal.memory-onboarding.v1';
@@ -115,6 +129,141 @@ export function loadDraft(): MemoryDraft {
   return emptyDraft();
 }
 
+// Source-specific conversations are demo fixtures; extraction below uses their exact facts.
+const sourceSamples: Record<string, Partial<SampleSession>> = {
+  "openclaw-intro": {
+    "title": "Monday assistant check-in · introductions to follow up",
+    "excerpt": "Ari: Check my introduction queue each Monday. Draft reminders for warm introductions from founders I already know, and put technical seed leads first. Show me each message before sending it.",
+    "facts": {
+      "goals": "Follow up on warm introductions to technical seed leads each Monday.",
+      "boundaries": "Draft outreach for review; ask before sending any message."
+    },
+    "reason": "A recurring assistant check-in sets an outreach priority and approval boundary."
+  },
+  "manus-diligence": {
+    "title": "Research task · investor shortlist and conflicts",
+    "excerpt": "Ari: Make a shortlist of seed funds that invest in developer tools. Compare stage, thesis and portfolio overlap. Put a source link beside every claim and mark missing cheque sizes as unknown. Do not treat a fund appearing in research as my endorsement.",
+    "facts": {
+      "preferences": "Evaluate seed funds by developer-tools thesis and portfolio conflicts; keep source links and flag unknown cheque sizes."
+    },
+    "reason": "A delegated research task defines screening criteria without endorsing any fund."
+  },
+  "gemini-sample": {
+    "title": "Pitch rehearsal · explain the product to a nontechnical partner",
+    "excerpt": "Ari: Help me explain Tracewell without jargon. Start with the problem for engineering teams, then show one concrete workflow. In my next investor conversation I want to learn whether that story is clear before we discuss the round.",
+    "facts": {
+      "goals": "Test a plain-language product story and one concrete engineering workflow with investors."
+    },
+    "reason": "Pitch rehearsal reveals what the founder wants to learn from the next conversation."
+  },
+  "copilot-sample": {
+    "title": "Meeting brief · questions for an operating partner",
+    "excerpt": "Ari: Turn my meeting agenda into three questions: who can introduce engineering customers, who helps with the first technical hires, and what does their support look like after investing? I want concrete examples, not promises.",
+    "facts": {
+      "goals": "Ask investors for concrete examples of customer introductions, technical hiring help and post-investment support."
+    },
+    "reason": "Meeting preparation names the concrete investor support the founder wants to evaluate."
+  },
+  "hermes-sample": {
+    "title": "Remember my working style · direct feedback and autonomy",
+    "excerpt": "Ari: Remember this for future introductions: I prefer direct, specific feedback over polished encouragement. Investors can challenge our thinking, but product and hiring decisions stay with us. Bring that preference forward in future meeting briefs.",
+    "facts": {
+      "preferences": "Prefers direct, specific feedback and retains founder control over product and hiring decisions."
+    },
+    "reason": "The founder asks a persistent assistant to remember feedback style and decision autonomy."
+  },
+  "opencode-sample": {
+    "title": "Demo preparation · what the investor should see",
+    "excerpt": "Ari: As we prepare the product demo, keep the investor story focused on the user workflow, not our implementation. Show the problem, the working product and what we want design partners to test. Leave internal architecture out of the pitch.",
+    "facts": {
+      "goals": "Show the user problem, a working product flow and the next design-partner test in the investor demo.",
+      "boundaries": "Keep internal implementation and architecture out of the initial pitch."
+    },
+    "reason": "Demo preparation contains business goals and a disclosure boundary; implementation work is excluded."
+  },
+  "messages-sample": {
+    "title": "Text after coffee · a founder introduction I would accept",
+    "excerpt": "Ari: That coffee was useful because they challenged the product and offered to introduce two engineering leads. More introductions like that, please. I do not want another broad networking chat with no reason to meet.",
+    "facts": {
+      "preferences": "Values product-specific feedback and engineering introductions over general networking."
+    },
+    "reason": "A post-coffee text explains the personal reasons a meeting was worthwhile."
+  },
+  "whatsapp-sample": {
+    "title": "Cofounder chat · approval before forwarding the deck",
+    "excerpt": "Ari: Please send me the recipient list before forwarding our deck. The public product story is fine, but revenue, customer names and private repository links need my approval first.",
+    "facts": {
+      "boundaries": "Approve deck recipients before forwarding; ask before sharing revenue, customer names or private repository links."
+    },
+    "reason": "A cofounder exchange defines approval rules for sharing the deck and private information."
+  },
+  "drive-brief": {
+    "title": "Tracewell · seed deck working draft",
+    "excerpt": "Deck draft: Tracewell builds open-source tracing for AI agents in production. The working seed target is $2.5M. This is a draft, not a closed round. The money is intended for product development and design-partner validation.",
+    "facts": {
+      "company": "Tracewell builds open-source tracing for AI agents in production.",
+      "funding": "Working seed target: $2.5M, intended for product development and design-partner validation; the round is not closed."
+    },
+    "reason": "A working deck supplies a product description and proposed use of funds, not a closed-round claim."
+  },
+  "outlook-followup": {
+    "title": "Diligence follow-up · agree the next step before another call",
+    "excerpt": "Ari: Before another meeting, please confirm your seed-stage mandate and who would lead technical diligence. I can arrange a product walkthrough once there is a clear question and an owner for the next step.",
+    "facts": {
+      "preferences": "Confirm seed-stage fit and a technical-diligence owner before scheduling another investor call."
+    },
+    "reason": "A diligence follow-up sets conditions for scheduling another investor meeting."
+  },
+  "notion-plan": {
+    "title": "Weekly operating plan · protect product time during the raise",
+    "excerpt": "Weekly plan: Limit fundraising to two focused blocks each week. Protect the remaining time for building and design-partner feedback. Judge investor meetings by whether they move a specific decision forward.",
+    "facts": {
+      "preferences": "Keep fundraising in two focused weekly blocks and protect time for product development and design-partner feedback."
+    },
+    "reason": "An operating plan records time allocation and the founder’s criteria for useful meetings."
+  },
+  "slack-decision": {
+    "title": "Team decision · approved external demo material",
+    "excerpt": "Team: Use the reviewed demo repository for external calls. Do not share private repositories or unannounced roadmap items. Ask the founder before sending customer names or revenue numbers.",
+    "facts": {
+      "boundaries": "Use only the reviewed demo repository externally; keep private code and unannounced roadmap items private."
+    },
+    "reason": "A team decision identifies which demo material may be shared externally."
+  },
+  "muse-goal": {
+    "title": "Personal reflection · what makes a meeting worth my energy?",
+    "excerpt": "Ari: I leave back-to-back coffees drained. Help me be intentional about who I meet: someone curious about the product, candid with feedback and willing to help. Prefer a few thoughtful conversations over a full calendar. Remind me to leave time to build and reflect afterward.",
+    "facts": {
+      "preferences": "Prefers a few thoughtful conversations with curious, candid people over a packed calendar.",
+      "goals": "Protect time to build and reflect between meetings; prioritize conversations with a clear personal reason to meet."
+    },
+    "reason": "A personal reflection identifies social energy, working rhythm and motivations for meeting people."
+  },
+  "muse-personal": {
+    "title": "Personal assistant · weekend errands",
+    "excerpt": "Ari: Group grocery shopping and dry-cleaning pickup into one trip, then leave Saturday afternoon free. This is just a personal errands plan.",
+    "facts": {},
+    "reason": "An errands plan is personal context with no startup or meeting preference to retain."
+  },
+  "linkedin-profile": {
+    "title": "Ari Kapoor · professional background",
+    "excerpt": "Founder & CEO, Tracewell. Previously worked on observability at Stripe and tracing at Segment.",
+    "facts": {
+      "company": "Tracewell builds open-source tracing for AI agents in production."
+    },
+    "reason": "Professional background supports founder and company context, not fundraising intent."
+  },
+  "files-brief": {
+    "title": "Tracewell · founder-written introduction brief",
+    "excerpt": "Founder brief: Tracewell builds open-source tracing for AI agents in production. For introductions, use a short product description and offer a live demo. Send the full deck only after I have approved the introduction.",
+    "facts": {
+      "company": "Tracewell builds open-source tracing for AI agents in production.",
+      "boundaries": "Use a short product introduction and offer a live demo; send the full deck only after the founder approves the introduction."
+    },
+    "reason": "A founder-written brief provides the product story and rules for introductions."
+  }
+};
+
 // Reuse the editable profile identity in fictional connector samples. These remain demo evidence.
 export function sessionsForProfile(user: User): SampleSession[] {
   const replace = (text: string) => text
@@ -122,7 +271,7 @@ export function sessionsForProfile(user: User): SampleSession[] {
     .replace(/Tracewell is open-source tracing for AI agents in production\./g, `${user.company}: ${user.pitch}.`)
     .replace(/Tracewell builds open-source tracing for AI agents\./g, `${user.company}: ${user.pitch}.`)
     .replace(/Open-source tracing for production AI agents\./g, `${user.company}: ${user.pitch}.`)
-    .replace(/Tracewell/g, user.company).replace(/Ari Kapoor/g, user.name).replace(/\bAri\b/g, user.name.split(' ')[0]);
+    .replace(/Tracewell/g, user.company).replace(/Ari Kapoor/g, user.name).replace(/\bAri\b/g, user.name);
   // Additional Intuition-specific fixtures are invented demo scenarios, not biography.
   const intuitionSamples: Record<string, Partial<SampleSession>> = {
     'gpt-raise': {
@@ -132,7 +281,7 @@ export function sessionsForProfile(user: User): SampleSession[] {
     },
     'claude-fit': {
       title: 'Investor fit · technical depth and useful introductions',
-      excerpt: 'Demo founder: Prioritize seed investors who understand AI developer tools and can introduce engineering teams. I can show Intuition working on a real repository. Keep product and hiring decisions with our team. Ask before sharing revenue, customer names or private code.',
+      excerpt: 'Demo founder: Prioritize seed investors who understand AI developer tools and can introduce engineering teams. I can show Intuition working on a real repository. Keep product and hiring decisions with our team. Ask before sharing revenue, customer names or private code. Share the product story and a reviewed demo.',
       facts: { preferences: 'Prefer technical seed investors who bring engineering-team introductions. Keep product and hiring decisions with the founding team.', boundaries: 'Ask before sharing revenue, customer names or private code. Share the product story and a reviewed demo.' }
     },
     'codex-context': {
@@ -148,9 +297,10 @@ export function sessionsForProfile(user: User): SampleSession[] {
     }
   };
   const isIntuitionDemo = user.name === 'Kwok Zheng Feng' && user.company === 'Intuition';
-  const profileSessions = isIntuitionDemo ? sessions.map(session => ({ ...session, ...intuitionSamples[session.id] })) : sessions;
+  const sourceSessions = sessions.map(session => ({ ...session, ...sourceSamples[session.id] }));
+  const profileSessions = isIntuitionDemo ? sourceSessions.map(session => ({ ...session, ...intuitionSamples[session.id] })) : sourceSessions;
   const adapt = (text: string) => isIntuitionDemo ? replace(text).replace(/open-source infrastructure/g, 'AI developer tools').replace(/open-source distribution/g, 'developer-led adoption').replace(/open source/g, 'developer-led adoption') : replace(text);
   return profileSessions.map(session => session.id === 'linkedin-profile' 
-    ? { ...session, title: `${user.name} · profile`, excerpt: [user.headline, ...user.experience].join('. '), facts: { company: `${user.company}: ${user.pitch}.` } }
+    ? { ...session, title: `${user.name} · profile`, excerpt: [`${user.name} · ${user.headline}`, `${user.company}: ${user.pitch}`, user.location, ...user.experience].join('. '), facts: { company: `${user.company}: ${user.pitch}.` } }
     : { ...session, title: adapt(session.title), excerpt: adapt(session.excerpt), facts: Object.fromEntries(Object.entries(session.facts).map(([key, value]) => [key, adapt(value)])) });
 }

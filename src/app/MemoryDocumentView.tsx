@@ -55,8 +55,7 @@ export default function MemoryDocument({ brief, evidence, review, editedAt, prof
       <button type="button" className="memory-document__action" disabled={invalid || editing !== null} onClick={download}>Export .md</button>
     </div>
     {view === 'preview' ? <div className="memory-document__body">{memoryFields.map(field => {
-      // Company is taken from the confirmed profile, never from imported company claims.
-      const refs = field.id === 'company' ? [] : evidence.filter(item => item.facts[field.id]);
+      const refs = evidence.filter(item => item.facts[field.id]);
       const hasProfile = Boolean(profile?.[field.id]?.trim());
       return <section className="memory-document__section" key={field.id}>
         <div className="memory-document__section-head"><h2>{documentLabels[field.id]}</h2>{editing !== field.id && <button className="memory-document__action" aria-label={`Edit ${documentLabels[field.id]}`} onClick={() => { if (editing) onChange({ ...brief, [editing]: editValue }); setEditing(field.id); setEditValue(brief[field.id]); }}>Edit</button>}</div>

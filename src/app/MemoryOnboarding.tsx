@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createBrief, emptyDraft, loadDraft, memoryFields, sessionsForProfile, sources, storageKey, type SourceId } from './memoryData';
+import { assembleMemory, createBrief, emptyDraft, loadDraft, memoryFields, sessionsForProfile, sources, storageKey, type SourceId } from './memoryData';
 import { useProfile } from './profile';
 import SourcePicker from './SourcePicker';
 import ContextImport from './ContextImport';
@@ -38,14 +38,8 @@ export default function MemoryOnboarding({ step, go }: { step: MemoryStep; go: (
   };
 
   const generate = () => {
-    const imported = createBrief(included.map(s => s.id), sessions);
     const profile = profileBrief();
-    const brief = {
-      ...imported,
-      company: profile.company,
-      goals: [profile.goals, imported.goals].filter(Boolean).join('\n'),
-      preferences: [profile.preferences, imported.preferences].filter(Boolean).join('\n')
-    };
+    const brief = assembleMemory(profile, included);
     setDraft(d => ({ ...d, included: included.map(s => s.id), brief, provenance: { profile, sessions: included, notes: context }, editedAt: {}, generated: true, saved: false }));
     go('memory');
   };
