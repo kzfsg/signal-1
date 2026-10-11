@@ -42,5 +42,3 @@ export function useApi<T>(path: string | null, every = 0) {
   return { ...state, reload: load };
 }
 
-/** "Not configured" errors carry setup instructions; show those quietly rather than as failures. */
-export const isSetup = (error: string | null) => !!error && /not configured|npm run|No Dial number/i.test(error);

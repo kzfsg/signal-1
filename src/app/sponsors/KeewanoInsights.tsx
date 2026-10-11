@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useProfile } from '../profile';
 import { api, useApi } from './api';
-import { Unavailable } from './DialLine';
 import { SponsorTag } from './SponsorTag';
 
 interface Insights {
@@ -44,6 +43,9 @@ export function KeewanoInsights() {
       .catch(() => setLogged(null));
   }, [meets]);
 
+  // Only appears once Keewano is set up and answering.
+  if (!insights.data) return null;
+
   return (
     <section className="sponsor card">
       <header className="sponsor__head">
@@ -62,9 +64,6 @@ export function KeewanoInsights() {
           </div>
         )}
       </header>
-
-      {insights.loading && <p className="t-small t-muted">Querying Keewano…</p>}
-      {insights.error && <Unavailable error={insights.error} />}
 
       {insights.data && (
         <>
@@ -85,7 +84,7 @@ export function KeewanoInsights() {
         </>
       )}
 
-      {!insights.error && <Ask />}
+      <Ask />
     </section>
   );
 }
@@ -126,7 +125,7 @@ function Ask() {
           {answer.calls.length > 0 && <p className="t-small t-muted">Answered from {answer.calls.length} live Keewano {answer.calls.length === 1 ? 'query' : 'queries'}: {[...new Set(answer.calls.map(c => c.tool))].join(', ')}</p>}
         </div>
       )}
-      {error && <Unavailable error={error} />}
+      {error && <p className="t-small dial__error">Couldn’t answer that: {error}</p>}
     </div>
   );
 }

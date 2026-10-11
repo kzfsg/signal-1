@@ -12,11 +12,11 @@
 /* Shared sponsor panel ---------------------------------------------------------- */
 
 .results__sponsors { display: grid; gap: 1.25rem; }
+.results__sponsors:empty { display: none; }
 
 .sponsor { display: grid; gap: 1.5rem; padding: 1.75rem; }
 .sponsor__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; align-items: end; }
 .sponsor__head > div:first-child { display: grid; gap: 0.6rem; max-width: 40rem; }
-.sponsor__setup { margin: 0; padding: 0.75rem 1rem; border-radius: var(--radius-sm); background: var(--paper); }
 
 /* Bubbles and verdicts are drawn for the dark live run; restyle them on white cards. */
 .sponsor .bubble,

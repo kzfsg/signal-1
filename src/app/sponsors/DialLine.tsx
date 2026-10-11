@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Meet } from '../data';
 import { useProfile } from '../profile';
 import { VerdictBadge } from '../parts';
-import { api, isSetup, useApi } from './api';
+import { api, useApi } from './api';
 import { SponsorTag } from './SponsorTag';
 
 interface NumberInfo { number: string; capabilities: string[]; ready: boolean }
@@ -25,6 +25,9 @@ export function DialLine() {
   const line = useApi<NumberInfo>('dial/number');
   const inbox = useApi<Inbox>(line.data ? 'dial/inbox' : null, 4000);
 
+  // Only appears once Dial is set up; until then the page simply doesn't mention it.
+  if (!line.data) return null;
+
   return (
     <section className="sponsor card">
       <header className="sponsor__head">
@@ -36,40 +39,33 @@ export function DialLine() {
             and follows up by text either way.
           </p>
         </div>
-        {line.data && (
-          <div className="dial__number">
-            <span className="t-label t-muted">Text or call your agent</span>
-            <p className="t-headline">{pretty(line.data.number)}</p>
-            {!line.data.ready && <span className="t-small t-muted">Finishing setup, texts work now</span>}
-          </div>
-        )}
+        <div className="dial__number">
+          <span className="t-label t-muted">Text or call your agent</span>
+          <p className="t-headline">{pretty(line.data.number)}</p>
+          {!line.data.ready && <span className="t-small t-muted">Finishing setup, texts work now</span>}
+        </div>
       </header>
 
-      {line.loading && <p className="t-small t-muted">Connecting to Dial…</p>}
-      {line.error && <Unavailable error={line.error} />}
-
-      {line.data && (
-        <div className="dial__grid">
-          <CallSomeone />
-          <div className="dial__inbox">
-            <span className="t-label t-muted">Live inbox</span>
-            {!inbox.data?.threads.length ? (
-              <p className="t-small t-muted">No texts yet. Text {pretty(line.data.number)} and watch your agent screen you here.</p>
-            ) : (
-              <ul className="dial__threads">
-                {inbox.data.threads.map(t => (
-                  <li key={t.contact}>
-                    <span className="t-small t-muted">{pretty(t.contact)}</span>
-                    {t.messages.slice(-4).map((m, i) => (
-                      <p key={i} className={`bubble bubble--${m.from === 'agent' ? 'you' : 'them'}`}>{m.text}</p>
-                    ))}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+      <div className="dial__grid">
+        <CallSomeone />
+        <div className="dial__inbox">
+          <span className="t-label t-muted">Live inbox</span>
+          {!inbox.data?.threads.length ? (
+            <p className="t-small t-muted">No texts yet. Text {pretty(line.data.number)} and watch your agent screen you here.</p>
+          ) : (
+            <ul className="dial__threads">
+              {inbox.data.threads.map(t => (
+                <li key={t.contact}>
+                  <span className="t-small t-muted">{pretty(t.contact)}</span>
+                  {t.messages.slice(-4).map((m, i) => (
+                    <p key={i} className={`bubble bubble--${m.from === 'agent' ? 'you' : 'them'}`}>{m.text}</p>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      )}
+      </div>
     </section>
   );
 }
@@ -147,6 +143,7 @@ function CallSomeone() {
 /** Text the person the booking or the kind "not right now", from the agent's number. */
 export function TextFollowUp({ meet }: { meet: Meet }) {
   const { first } = useProfile();
+  const line = useApi<NumberInfo>('dial/number');
   const them = meet.person.name.split(' ')[0];
   const draft = meet.verdict === 'meet'
     ? `Hi ${them}, ${first}'s assistant here. ${first} would love to meet: does ${dayName(meet)} at ${time(meet)} work for 30 minutes? Reply and I'll lock it in.`
@@ -170,6 +167,8 @@ export function TextFollowUp({ meet }: { meet: Meet }) {
     }
   };
 
+  if (!line.data) return null;
+
   return (
     <div className="card followup">
       <div className="followup__head">
@@ -184,7 +183,7 @@ export function TextFollowUp({ meet }: { meet: Meet }) {
         </button>
       </div>
       {state.sent && <p className="t-small">Sent by {state.sent === 'imessage' ? 'iMessage' : state.sent.toUpperCase()} from your agent’s number.</p>}
-      {state.error && (isSetup(state.error) ? <Unavailable error={state.error} /> : <p className="t-small dial__error">{state.error}</p>)}
+      {state.error && <p className="t-small dial__error">{state.error}</p>}
     </div>
   );
 }
@@ -196,6 +195,3 @@ const time = (m: Meet) => {
   return `${((h + 11) % 12) + 1}${min ? `:${String(min).padStart(2, '0')}` : ''}${h < 12 ? 'am' : 'pm'}`;
 };
 
-export function Unavailable({ error }: { error: string }) {
-  return <p className="t-small t-muted sponsor__setup">{isSetup(error) ? `Not connected yet. ${error}` : `Couldn’t reach it: ${error}`}</p>;
-}
