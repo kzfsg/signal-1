@@ -6,21 +6,32 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b && tsc -p tsconfig.server.json",
+    "dial:setup": "tsx --env-file=.env.local scripts/dial-setup.ts",
+    "keewano:setup": "tsx --env-file=.env.local scripts/keewano-setup.ts",
+    "test": "tsx --test server/*.test.ts"
   },
   "dependencies": {
+    "@ai-sdk/mcp": "^2.0.73",
+    "@getdial/sdk": "^0.41.1",
+    "ai": "^7.0.137",
     "motion": "^12.43.0",
     "ogl": "^1.0.11",
+    "pg": "^8.23.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
   }

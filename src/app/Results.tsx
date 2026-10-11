@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { meets, totals, dayNames, formatTime } from './data';
+import { totals, dayNames, formatTime } from './data';
+import { useProfile } from './profile';
 import { Avatar, Calendar, NotesCard, TracePanel, VerdictBadge } from './parts';
-
-const keep = meets.filter(m => m.verdict === 'meet');
-const skipped = meets.filter(m => m.verdict === 'skip');
+import { DialLine, TextFollowUp } from './sponsors/DialLine';
+import { KeewanoInsights } from './sponsors/KeewanoInsights';
+import './sponsors/sponsors.css';
 
 export default function Results() {
+  const { meets } = useProfile();
+  const keep = meets.filter(m => m.verdict === 'meet');
+  const skipped = meets.filter(m => m.verdict === 'skip');
   const [tab, setTab] = useState<'meet' | 'skip'>('meet');
   const list = tab === 'meet' ? keep : skipped;
   const [selected, setSelected] = useState(keep[0].id);
@@ -62,7 +66,13 @@ export default function Results() {
             <button role="tab" aria-selected={view === 'trace'} className={`tab${view === 'trace' ? ' tab--on' : ''}`} onClick={() => setView('trace')}>What your agent did</button>
           </div>
           {view === 'notes' ? <NotesCard meet={meet} /> : <div className="card results__trace"><TracePanel meet={meet} /></div>}
+          <TextFollowUp meet={meet} />
         </div>
+      </div>
+
+      <div className="results__sponsors">
+        <DialLine />
+        <KeewanoInsights />
       </div>
 
       <div className="results__month">

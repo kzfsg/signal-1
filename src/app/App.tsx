@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChromeRipple, Wordmark } from '@/signal';
-import { meets, questionnaire, totals, user } from './data';
+import { questionnaire, totals } from './data';
+import { agentLabel, agentName, useProfile, type AgentProvider } from './profile';
 import { Avatar, Calendar } from './parts';
 import LiveRun from './LiveRun';
 import Results from './Results';
@@ -22,6 +23,7 @@ function readStep(): Step {
 }
 
 export default function App() {
+  const { user } = useProfile();
   const [step, setStep] = useState<Step>(readStep);
 
   useEffect(() => {
@@ -69,6 +71,7 @@ export default function App() {
 }
 
 function Login({ onDone }: { onDone: () => void }) {
+  const { user } = useProfile();
   return (
     <div className="login">
       <ChromeRipple position="bottom">
@@ -88,6 +91,7 @@ function Login({ onDone }: { onDone: () => void }) {
 }
 
 function LinkedIn({ onDone }: { onDone: () => void }) {
+  const { user, setUser, resetUser } = useProfile();
   const [state, setState] = useState<'idle' | 'importing' | 'done'>('idle');
 
   const start = () => {
@@ -105,7 +109,7 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
       <div className="card form-card">
         <label className="field">
           <span className="t-label">LinkedIn profile</span>
-          <input defaultValue={user.linkedin} disabled={state !== 'idle'} />
+          <input value={user.linkedin} onChange={e => setUser({ linkedin: e.target.value })} disabled={state !== 'idle'} />
         </label>
         {state !== 'done' && (
           <button className="btn btn--ink" onClick={start} disabled={state === 'importing'}>
@@ -123,25 +127,134 @@ function LinkedIn({ onDone }: { onDone: () => void }) {
                 <p className="t-small t-muted">{user.location}</p>
               </div>
             </div>
-            <ul className="rule-list profile__list">
-              <li><strong>{user.company}</strong>: {user.pitch}</li>
-              {user.experience.map(e => <li key={e}>{e}</li>)}
-            </ul>
-            <button className="btn btn--ink" onClick={onDone}>Looks right</button>
+            <p className="t-small t-muted">Edit anything that’s off. Your agent introduces you with exactly this.</p>
+            <div className="profile__fields">
+              <label className="field">
+                <span className="t-label">Name</span>
+                <input value={user.name} onChange={e => setUser({ name: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">Location</span>
+                <input value={user.location} onChange={e => setUser({ location: e.target.value })} />
+              </label>
+              <label className="field profile__wide">
+                <span className="t-label">Headline</span>
+                <input value={user.headline} onChange={e => setUser({ headline: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">Company</span>
+                <input value={user.company} onChange={e => setUser({ company: e.target.value })} />
+              </label>
+              <label className="field">
+                <span className="t-label">What it does</span>
+                <input value={user.pitch} onChange={e => setUser({ pitch: e.target.value })} />
+              </label>
+              <label className="field profile__wide">
+                <span className="t-label">Experience, one per line</span>
+                <textarea
+                  className="question__text"
+                  rows={4}
+                  value={user.experience.join('\n')}
+                  onChange={e => setUser({ experience: e.target.value.split('\n') })}
+                />
+              </label>
+            </div>
+            <div className="profile__actions">
+              <button className="btn btn--ink" onClick={onDone} disabled={!user.name.trim()}>Looks right</button>
+              <button className="btn btn--line" onClick={resetUser}>Reset to LinkedIn</button>
+            </div>
           </div>
         )}
       </div>
+
+      <ConnectAgent />
     </section>
   );
 }
 
-function Questions({ onDone }: { onDone: () => void }) {
-  const [chosen, setChosen] = useState<Record<string, string[]>>(() =>
-    Object.fromEntries(questionnaire.map(q => [q.id, q.chosen]))
-  );
+function ConnectAgent() {
+  const { agent, setAgent } = useProfile();
+  const [picked, setPicked] = useState<AgentProvider>(agent?.provider ?? 'claude');
+  const [endpoint, setEndpoint] = useState(agent?.endpoint ?? '');
+  const [connecting, setConnecting] = useState(false);
 
-  const toggle = (id: string, option: string) =>
-    setChosen(c => ({ ...c, [id]: c[id].includes(option) ? c[id].filter(o => o !== option) : [...c[id], option] }));
+  const validEndpoint = /^(https:\/\/|mcp:\/\/|wss:\/\/)\S+$/.test(endpoint.trim());
+  const canConnect = picked !== 'custom' || validEndpoint;
+
+  const connect = () => {
+    setConnecting(true);
+    setTimeout(() => {
+      setAgent(picked === 'custom' ? { provider: 'custom', endpoint: endpoint.trim() } : { provider: picked });
+      setConnecting(false);
+    }, 900);
+  };
+
+  return (
+    <div className="card form-card agent-connect">
+      <div>
+        <p className="t-title">Already have a personal agent?</p>
+        <p className="t-small t-muted">
+          Connect it and Signal sends your meets through it, so it speaks with the memory and tone you’ve already set up.
+          Skip this and Signal builds one for you.
+        </p>
+      </div>
+
+      {agent ? (
+        <div className="agent-connect__done">
+          <span className="agent-connect__dot" aria-hidden="true" />
+          <p className="t-small">
+            <strong>{agentLabel[agent.provider]} connected</strong>
+            {agent.endpoint && <span className="t-muted"> · {agent.endpoint}</span>}
+          </p>
+          <button className="btn btn--line" onClick={() => setAgent(null)}>Disconnect</button>
+        </div>
+      ) : (
+        <>
+          <div className="chips" role="radiogroup" aria-label="Personal agent">
+            {(Object.keys(agentLabel) as AgentProvider[]).map(p => (
+              <button
+                key={p}
+                type="button"
+                role="radio"
+                aria-checked={picked === p}
+                className={`chip${picked === p ? ' chip--on' : ''}`}
+                onClick={() => setPicked(p)}
+                disabled={connecting}
+              >
+                {agentLabel[p]}
+              </button>
+            ))}
+          </div>
+          {picked === 'custom' && (
+            <label className="field">
+              <span className="t-label">Agent endpoint (MCP or HTTPS)</span>
+              <input
+                placeholder="https://agent.example.com/mcp"
+                value={endpoint}
+                onChange={e => setEndpoint(e.target.value)}
+                disabled={connecting}
+              />
+            </label>
+          )}
+          <div>
+            <button className="btn btn--ink" onClick={connect} disabled={!canConnect || connecting}>
+              {connecting ? 'Connecting…' : `Connect ${agentLabel[picked]}`}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Questions({ onDone }: { onDone: () => void }) {
+  const { user, first, agent, options, chosen, toggle, addOption, context, setContext } = useProfile();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+
+  const add = (id: string) => {
+    addOption(id, drafts[id] ?? '');
+    setDrafts(d => ({ ...d, [id]: '' }));
+  };
 
   return (
     <section className="panel panel--wide">
@@ -157,7 +270,7 @@ function Questions({ onDone }: { onDone: () => void }) {
               <legend className="t-title">{q.question}</legend>
               {q.options.length > 0 ? (
                 <div className="chips">
-                  {q.options.map(o => (
+                  {options[q.id].map(o => (
                     <button
                       key={o}
                       type="button"
@@ -168,9 +281,18 @@ function Questions({ onDone }: { onDone: () => void }) {
                       {o}
                     </button>
                   ))}
+                  <form className="chip-add" onSubmit={e => { e.preventDefault(); add(q.id); }}>
+                    <input
+                      className="chip chip-add__input"
+                      placeholder="+ Add your own"
+                      aria-label={`Add your own answer to: ${q.question}`}
+                      value={drafts[q.id] ?? ''}
+                      onChange={e => setDrafts(d => ({ ...d, [q.id]: e.target.value }))}
+                    />
+                  </form>
                 </div>
               ) : (
-                <textarea className="question__text" defaultValue={q.text} rows={3} />
+                <textarea className="question__text" value={context} onChange={e => setContext(e.target.value)} rows={3} />
               )}
             </fieldset>
           ))}
@@ -181,8 +303,8 @@ function Questions({ onDone }: { onDone: () => void }) {
             <div className="mirror__head">
               <Avatar name={user.name} kind="you" size={44} />
               <div>
-                <p className="t-title">{user.first}’s agent</p>
-                <p className="t-small">Mirrors what you’re looking for</p>
+                <p className="t-title">{first}’s agent</p>
+                <p className="t-small">{agent ? `Runs on your ${agentName(agent)}` : 'Mirrors what you’re looking for'}</p>
               </div>
             </div>
             {[
@@ -195,6 +317,12 @@ function Questions({ onDone }: { onDone: () => void }) {
                 <ul>{(items as string[]).map(i => <li key={i}>{i}</li>)}</ul>
               </div>
             ))}
+            {context.trim() && (
+              <div className="mirror__group">
+                <p className="t-label">Good to know</p>
+                <p className="t-small">{context}</p>
+              </div>
+            )}
           </div>
           <button className="btn btn--ink mirror__btn" onClick={onDone}>Build my agent</button>
         </aside>
@@ -204,6 +332,7 @@ function Questions({ onDone }: { onDone: () => void }) {
 }
 
 function ConnectCalendar({ onDone }: { onDone: () => void }) {
+  const { meets } = useProfile();
   const [connected, setConnected] = useState(false);
 
   return (
@@ -234,6 +363,7 @@ function ConnectCalendar({ onDone }: { onDone: () => void }) {
 }
 
 function Compress({ onDone }: { onDone: () => void }) {
+  const { meets } = useProfile();
   const [phase, setPhase] = useState<'packed' | 'compressing' | 'done'>('packed');
 
   useEffect(() => {
