@@ -33,6 +33,23 @@
 }
 
 .app__stages li { display: flex; align-items: center; gap: 0.45rem; }
+.app__stage-button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.app__stage-button:hover { background: var(--paper); color: var(--ink); }
+.app__stage-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .app__stages .current { color: var(--ink); }
 
 .app__stage-n {
@@ -54,7 +71,10 @@
 .app--live .app__main { padding: 0; }
 
 @media (max-width: 820px) {
-  .app__stages { display: none; }
+  .app__bar { flex-wrap: wrap; gap: 0.5rem; }
+  .app__stages { order: 3; width: 100%; justify-content: space-between; gap: 0; }
+  .app__stage-button { min-width: 44px; justify-content: center; }
+  .app__stage-label { display: none; }
 }
 
 /* Login ------------------------------------------------------------------ */
@@ -367,10 +387,5 @@
   .results__list { position: static; }
 }
 
-/* Personal agent ----------------------------------------------------------- */
 
-.agent-connect { gap: 1rem; }
 .app .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.agent-connect__done { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
-.agent-connect__done p { flex: 1; margin: 0; overflow-wrap: anywhere; }
-.agent-connect__dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--grad-sr); box-shadow: 0 0 0 3px var(--ink-10); }
